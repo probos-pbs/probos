@@ -1,0 +1,77 @@
+<configuration>
+  <property>
+    <name>probos.controller.hostname</name>
+    <value>localhost</value>
+  </property>
+  
+  <property>
+    <name>probos.controller.port</name>
+    <value>8027</value>
+  </property>
+
+  <property>
+    <name>probos.controller.http.port</name>
+    <value>8029</value>
+  </property>
+    
+  <property>
+   <name>probos.controller.bind.address</name>
+   <value>0.0.0.0</value>
+  </property>
+  
+   <property>
+    <name>probos.controller.kill.timeout</name>
+    <value>5000</value>
+  </property>
+  
+  <property>
+    <name>probos.job.max.queueable</name>
+    <value>10000</value>
+  </property>
+  
+  <property>
+    <name>probos.job.max.user.queueable</name>
+    <value>5000</value>
+  </property>
+  
+  <property>
+    <name>probos.controller.jobdir</name>
+    <value>probos/</value>
+  </property>
+  
+  <property>
+    <name>probos.job.default.cores</name>
+    <value>1</value>
+  </property>
+  
+   <property>
+    <name>probos.job.default.mem</name>
+    <value>512</value>
+  </property>
+  
+  <property>
+    <name>probos.job.default.duration</name>
+    <value>3600</value>
+  </property>
+  
+  <property>
+    <name>probos.rcp</name>
+    <value>scp -B</value>
+  </property>
+  
+  <property>
+    <name>probos.rcp.use</name>
+    <value>/</value>
+  </property>
+  
+  <property>
+ 	<name>probos.mail.client</name>
+ 	<value>SendmailClient</value>
+  </property>
+  
+  <property>
+ 	<name>probos.mail.sendmail</name>
+ 	<value>/usr/sbin/sendmail</value>
+  </property>
+  
+</configuration>

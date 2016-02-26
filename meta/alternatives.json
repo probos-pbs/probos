@@ -1,0 +1,191 @@
+{
+    "pbs_appmaster": {
+      "destination": "/usr/bin/pbs_appmaster",
+      "source": "bin/pbs_appmaster",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "pbs_dibclient": {
+      "destination": "/usr/bin/pbs_dibclient",
+      "source": "bin/pbs_dibclient",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "pbs_intclient": {
+      "destination": "/usr/bin/pbs_intclient",
+      "source": "bin/pbs_intclient",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "pbs_server": {
+      "destination": "/usr/bin/pbs_server",
+      "source": "bin/pbs_server",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "pbsdsh": {
+      "destination": "/usr/bin/pbsdsh",
+      "source": "bin/pbsdsh",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "pbsnodes": {
+      "destination": "/usr/bin/pbsnodes",
+      "source": "bin/pbsnodes",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "qalter": {
+      "destination": "/usr/bin/qalter",
+      "source": "bin/qalter",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "qdel": {
+      "destination": "/usr/bin/qdel",
+      "source": "bin/qdel",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "qdisable": {
+      "destination": "/usr/bin/qdisable",
+      "source": "bin/qdisable",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "qenable": {
+      "destination": "/usr/bin/qenable",
+      "source": "bin/qenable",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "qhold": {
+      "destination": "/usr/bin/qhold",
+      "source": "bin/qhold",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "qmgr": {
+      "destination": "/usr/bin/qmgr",
+      "source": "bin/qmgr",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "qmove": {
+      "destination": "/usr/bin/qmove",
+      "source": "bin/qmove",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "qmsg": {
+      "destination": "/usr/bin/qmsg",
+      "source": "bin/qmsg",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "qorder": {
+      "destination": "/usr/bin/qorder",
+      "source": "bin/qorder",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "qpeek": {
+      "destination": "/usr/bin/qpeek",
+      "source": "bin/qpeek",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "qrerun": {
+      "destination": "/usr/bin/qrerun",
+      "source": "bin/qrerun",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "qrls": {
+      "destination": "/usr/bin/qrls",
+      "source": "bin/qrls",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "qrun": {
+      "destination": "/usr/bin/qrun",
+      "source": "bin/qrun",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "qselect": {
+      "destination": "/usr/bin/qselect",
+      "source": "bin/qselect",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "qsig": {
+      "destination": "/usr/bin/qsig",
+      "source": "bin/qsig",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "qstart": {
+      "destination": "/usr/bin/qstart",
+      "source": "bin/qstart",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "qstat": {
+      "destination": "/usr/bin/qstat",
+      "source": "bin/qstat",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "qstop": {
+      "destination": "/usr/bin/qstop",
+      "source": "bin/qstop",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "qsub": {
+      "destination": "/usr/bin/qsub",
+      "source": "bin/qsub",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "qterm": {
+      "destination": "/usr/bin/qterm",
+      "source": "bin/qterm",
+      "priority": 10,
+      "isDirectory": false
+    },
+    
+    "submitAll.pl": {
+      "destination": "/usr/bin/submitAll.pl",
+      "source": "bin/submitAll.pl",
+      "priority": 10,
+      "isDirectory": false
+    }
+    
+}

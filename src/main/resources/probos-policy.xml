@@ -1,0 +1,6 @@
+<configuration>
+  <property>
+    <name>security.pbsclient.protocol.acl</name>
+    <value>*</value>
+  </property>
+</configuration>

@@ -1,0 +1,12 @@
+<configuration>
+  <property>
+    <name>probos.controller.hostname</name>
+    <value>trnode01</value>
+  </property>
+  
+  <property>
+    <name>probos.rcp.use</name>
+    <value>/users,/local</value>
+  </property>
+  
+</configuration>

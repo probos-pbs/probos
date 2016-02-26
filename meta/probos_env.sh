@@ -1,0 +1,2 @@
+#!/bin/bash
+export PROBOS_DIRNAME=${PARCEL_DIRNAME:-"ProBoS-0.1-SNAPSHOT"}
