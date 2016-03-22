@@ -16,6 +16,7 @@ public class Constants {
 //	}
 	
 	public static final String PRODUCT_NAME = "probos";
+	public static final String PRODUCT_VERSION = "0.2.10-SNAPSHOT";
 	public static final String DIRECTIVE_PREFIX = "#PBS";
 	public static final int DEFAULT_CONTROLLER_PORT = 8027;
 		
@@ -28,8 +29,9 @@ public class Constants {
 			new File(PROBOS_HOME, "lib/kitten-master-0.3.0-jar-with-dependencies.jar").getAbsolutePath());
 	public static final String PACKAGED_PROBOS_JAR_ON_SERVER = 
 			System.getProperty("probos.probos.master.jar", 
-			new File(PROBOS_HOME, "target/probos-0.1-SNAPSHOT-jar-with-dependencies.jar").getAbsolutePath());
-
+			new File(PROBOS_HOME, "target/"+PRODUCT_NAME+"-"
+					+PRODUCT_VERSION+".jar").getAbsolutePath());
+					//"-jar-with-dependencies"
 	
 	public static final String[] ARGS_HELP_OPTIONS = new String[]{"h", "help", "?"};
 	public static final String ARGS_HELP_MESSAGE = "Prints this help message";

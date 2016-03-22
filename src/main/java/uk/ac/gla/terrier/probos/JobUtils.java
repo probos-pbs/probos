@@ -33,7 +33,7 @@ public class JobUtils {
 	};
 	
 	
-	public static final String DEFAULT_QUEUE = "queue";
+	public static final String DEFAULT_QUEUE = "default";
 
 	/** Get the command line options for qsub */
 	public static final Options getOptions()
