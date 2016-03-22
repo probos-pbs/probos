@@ -54,6 +54,19 @@ public class TestKittenUtils2 {
 	}
 	
 	@Test
+	public void testHostnameMatching()
+	{
+		assertTrue(KittenUtils2.isNode("trnode01"));
+		assertTrue(KittenUtils2.isNode("trnode-01"));
+		assertTrue(KittenUtils2.isNode("node01"));		
+		assertTrue(KittenUtils2.isNode("node-01"));
+		assertFalse(KittenUtils2.isNode("salt"));
+		assertFalse(KittenUtils2.isNode("master"));
+		
+		
+	}
+	
+	@Test
 	public void testLuaSimpleJob() throws Exception {
 		String jobName = "testHostname";
 		PBSJob job = UtilsForTest.getSimpleJob(jobName, "hostname");
@@ -77,7 +90,7 @@ public class TestKittenUtils2 {
 					assertEquals("Bad job env for " + mapped,  System.getenv(mapped), clp.getEnvironment().get("PBS_O_" + mapped));
 			}	
 			assertEquals("1", clp.getEnvironment().get("PBS_JOBID"));
-			assertEquals("queue",  clp.getEnvironment().get("PBS_O_QUEUE"));
+			assertEquals(JobUtils.DEFAULT_QUEUE,  clp.getEnvironment().get("PBS_O_QUEUE"));
 			assertEquals(Utils.getHostname(), clp.getEnvironment().get("PBS_O_HOST"));
 			assertEquals("PBS_BATCH", clp.getEnvironment().get("PBS_ENVIRONMENT"));
 			assertEquals("1", clp.getEnvironment().get("PBS_CORES"));
@@ -162,7 +175,7 @@ public class TestKittenUtils2 {
 			seenArrayIds.add(arrayId);
 			
 			assertEquals("1", clp.getEnvironment().get("PBS_JOBID"));
-			assertEquals("queue",  clp.getEnvironment().get("PBS_O_QUEUE"));
+			assertEquals(JobUtils.DEFAULT_QUEUE,  clp.getEnvironment().get("PBS_O_QUEUE"));
 			assertEquals(Utils.getHostname(), clp.getEnvironment().get("PBS_O_HOST"));
 			assertEquals("PBS_BATCH", clp.getEnvironment().get("PBS_ENVIRONMENT"));
 			assertEquals("1", clp.getEnvironment().get("PBS_CORES"));

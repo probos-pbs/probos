@@ -97,7 +97,7 @@ public class KittenUtils2 {
 		for(String k : job.getVariable_List().keySet())
 		{
 			String value = job.getVariable_List().get(k);
-			
+			assert value != null : "Value for " + k + " was null";
 			//skip BASH_FUNC_module()="() \{  eval `/usr/bin/modulecmd bash $*`\10\}"
 			if (value.contains("`"))
 				continue;
@@ -372,10 +372,11 @@ public class KittenUtils2 {
 		
 	}
 	
-	static boolean isNode(String node)
+	@VisibleForTesting
+	public static boolean isNode(String node)
 	{
 		//TODO this is a hack
-		return node.matches("node(-?)\\d+");
+		return node.matches(".*node(-?)\\d+");
 	}
 	
 	protected static int parseNodeResourceList(PBSJob job,
