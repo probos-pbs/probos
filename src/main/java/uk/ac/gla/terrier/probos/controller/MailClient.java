@@ -164,7 +164,7 @@ public abstract class MailClient implements Closeable {
 				public Boolean call() throws Exception {
 					try{
 						ProcessBuilder pb = new ProcessBuilder();
-						pb.command(sendmail);
+						pb.command(sendmail, destination);
 						pb.redirectInput(Redirect.PIPE);
 						Process p = pb.start();
 						PrintWriter os = new PrintWriter(new OutputStreamWriter(p.getOutputStream()));
