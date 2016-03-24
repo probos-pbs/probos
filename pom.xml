@@ -1,126 +1,141 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>uk.ac.gla.terrier</groupId>
-  <artifactId>probos</artifactId>
-  <packaging>jar</packaging>
-  <version>0.1-SNAPSHOT</version>
-  <name>probos</name>
-  <url>http://maven.apache.org</url>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>uk.ac.gla.terrier</groupId>
+	<artifactId>probos</artifactId>
+	<packaging>jar</packaging>
+	<version>0.2.10-SNAPSHOT</version>
+	<name>probos</name>
+	<properties>
+		<slf4j.version>1.7.14</slf4j.version>
+		<logback.version>1.0.1</logback.version>
+	</properties>
 
-  
-   <repositories>
-    <repository>
-      <id>maven-hadoop</id>
-      <name>Hadoop Releases</name>
-      <url>https://repository.cloudera.com/content/repositories/releases/</url>
-    </repository>
-    <repository>
-      <id>cloudera-repos</id>
-      <name>Cloudera Repos</name>
-      <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
-    </repository>
-    
-    <repository>
-    <id>in-project</id>
-    <name>In Project Repo</name>
-    <url>file:///Users/craigm/Documents/2015/kitten/java/common/target</url>
-	</repository>
-    
-  </repositories>
-  
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.11</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-    	<groupId>org.apache.hadoop</groupId>
-    	<artifactId>hadoop-common</artifactId>
-    	<version>2.6.0</version>
-    	<scope>provided</scope>
-    </dependency>
-    <dependency>
-  		<groupId>org.apache.hadoop</groupId>
-  		<artifactId>hadoop-yarn-client</artifactId>
-  		<version>2.6.0</version>
-  		 <scope>provided</scope>
-  	</dependency>
-  	
-  	 <dependency>
-  		<groupId>org.apache.hadoop</groupId>
-  		<artifactId>hadoop-yarn-server-tests</artifactId>
-  		<version>2.6.0</version>
-  		 <scope>provided</scope>
-  	</dependency>
-  	
-  	<dependency>
-  		<groupId>org.apache.hadoop</groupId>
-  		<artifactId>hadoop-yarn-api</artifactId>
-  		<version>2.6.0</version>
-  		 <scope>provided</scope>
-  	</dependency>
-  	
-  	<dependency>
-  		<groupId>org.apache.hadoop</groupId>
-  		<artifactId>hadoop-yarn-server-common</artifactId>
-  		<version>2.6.0</version>
-  		 <scope>provided</scope>
-  	</dependency>
-  	
-  	<dependency>
-  		<groupId>org.apache.hadoop</groupId>
-  		<artifactId>hadoop-yarn-server-resourcemanager</artifactId>
-  		<version>2.6.0</version>
-  		 <scope>provided</scope>
-  	</dependency>
-  	
-  	<dependency>
-  		<groupId>org.apache.hadoop</groupId>
-  		<artifactId>hadoop-yarn-server-nodemanager</artifactId>
-  		<version>2.6.0</version>
-  		 <scope>provided</scope>
-  	</dependency>
-  	
-  	 <dependency>
-  		<groupId>org.apache.hadoop</groupId>
-  		<artifactId>hadoop-minicluster</artifactId>
-  		<version>2.6.0</version>
-  		 <scope>provided</scope>
-  	</dependency>
-  	
-  	
-  	<dependency>
-      <groupId>com.cloudera.kitten</groupId>
-      <artifactId>kitten-client</artifactId>
-      <version>0.3.0</version>
-      <scope>system</scope>
-      <systemPath>/Users/craigm/Documents/workspace/kitten/java/client/target/kitten-client-0.3.0.jar</systemPath>
-    </dependency>
-    
-    <dependency>
-      <groupId>com.cloudera.kitten</groupId>
-      <artifactId>kitten-master</artifactId>
-      <version>0.3.0</version>
-      <scope>system</scope>
-      <systemPath>/Users/craigm/Documents/workspace/kitten/java/master/target/kitten-master-0.3.0-jar-with-dependencies.jar</systemPath>
-    </dependency>
-  	
-	<dependency>
-      <groupId>com.cloudera.kitten</groupId>
-      <artifactId>kitten-common</artifactId>
-      <version>0.3.0</version>
-      <scope>system</scope>
-      <systemPath>/Users/craigm/Documents/workspace/kitten/java/common/target/kitten-common-0.3.0.jar</systemPath>
-    </dependency>
+	<repositories>
+		<repository>
+			<id>maven-hadoop</id>
+			<name>Hadoop Releases</name>
+			<url>https://repository.cloudera.com/content/repositories/releases/</url>
+		</repository>
+		<repository>
+			<id>cloudera-repos</id>
+			<name>Cloudera Repos</name>
+			<url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+		</repository>
 
-<dependency>
-	<groupId>net.sf.trove4j</groupId>
-	<artifactId>trove4j</artifactId>
-	<version>3.0.1</version>
-</dependency>
+		<repository>
+			<id>in-project</id>
+			<name>In Project Repo</name>
+			<url>file:///Users/craigm/Documents/2015/kitten/java/common/target</url>
+		</repository>
+
+	</repositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-common</artifactId>
+			<version>2.6.0</version>
+			<scope>provided</scope>
+
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-yarn-client</artifactId>
+			<version>2.6.0</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-yarn-server-tests</artifactId>
+			<version>2.6.0</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-yarn-api</artifactId>
+			<version>2.6.0</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-yarn-server-common</artifactId>
+			<version>2.6.0</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-yarn-server-resourcemanager</artifactId>
+			<version>2.6.0</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-yarn-server-nodemanager</artifactId>
+			<version>2.6.0</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-minicluster</artifactId>
+			<version>2.6.0</version>
+			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+
+		<dependency>
+			<groupId>com.cloudera.kitten</groupId>
+			<artifactId>kitten-client</artifactId>
+			<version>0.3.0</version>
+			<scope>system</scope>
+			<systemPath>/Users/craigm/Documents/workspace/kitten/java/client/target/kitten-client-0.3.0.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>com.cloudera.kitten</groupId>
+			<artifactId>kitten-master</artifactId>
+			<version>0.3.0</version>
+			<scope>system</scope>
+			<systemPath>/Users/craigm/Documents/workspace/kitten/java/master/target/kitten-master-0.3.0-jar-with-dependencies.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>com.cloudera.kitten</groupId>
+			<artifactId>kitten-common</artifactId>
+			<version>0.3.0</version>
+			<scope>system</scope>
+			<systemPath>/Users/craigm/Documents/workspace/kitten/java/common/target/kitten-common-0.3.0.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>net.sf.trove4j</groupId>
+			<artifactId>trove4j</artifactId>
+			<version>3.0.1</version>
+		</dependency>
 
 
 		<dependency>
@@ -137,73 +152,195 @@
 
 
 
-<dependency>
-    <groupId>com.sun.mail</groupId>
-    <artifactId>javax.mail</artifactId>
-    <version>1.5.1</version>
-</dependency>
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
+			<version>1.5.1</version>
+		</dependency>
 
-    <dependency>
-	<groupId>org.slf4j</groupId>
-	<artifactId>slf4j-api</artifactId>
-	<version>1.7.14</version>
-</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.14</version>
+		</dependency>
 
-<dependency>
-	<groupId>org.apache.sshd</groupId>
-	<artifactId>sshd-core</artifactId>
-	<version>1.1.0</version>
-</dependency>
-    
-  </dependencies>
-<!--
-<dependencyManagement>
-		<dependencies>
-			 <dependency>
-      <groupId>commons-httpclient</groupId>
-      <artifactId>commons-httpclient</artifactId>
-      <scope>compile</scope>
-      <version>3.1.0</version>
-        <systemPath>/Users/craigm/Downloads/hadoop-2.6.0/share/hadoop/tools/lib/commons-httpclient-3.1.jar</systemPath>
-    </dependency>
-		</dependencies>
-	</dependencyManagement>
--->
-  <build>
- 	<plugins>
-		<plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-compiler-plugin</artifactId>
-			<version>2.3.2</version>
-			<configuration>
-				<source>1.7</source>
-				<target>1.7</target>
-			</configuration>
-		</plugin>
+		<!-- <dependency> <groupId>ch.qos.logback</groupId> <artifactId>logback-classic</artifactId> 
+			<version>${logback.version}</version> </dependency> <dependency> <groupId>ch.qos.logback</groupId> 
+			<artifactId>logback-core</artifactId> <version>${logback.version}</version> 
+			</dependency> -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.14</version>
+			<scope>runtime</scope>
+		</dependency>
 
-<plugin>
-  <groupId>org.apache.maven.plugins</groupId>
-  <artifactId>maven-assembly-plugin</artifactId>
-  <configuration>
-    <archive>
-      <manifest>
-        <mainClass>${fully.qualified.main.class}</mainClass>
-      </manifest>
-    </archive>
-    <descriptorRefs>
-      <descriptorRef>jar-with-dependencies</descriptorRef>
-    </descriptorRefs>
-  </configuration>
-  <executions>
-    <execution>
-      <phase>package</phase>
-      <goals>
-        <goal>single</goal>
-      </goals>
-    </execution>
-  </executions>
-</plugin>
-  </plugins>
-  </build>
+		<dependency>
+			<groupId>org.apache.sshd</groupId>
+			<artifactId>sshd-core</artifactId>
+			<version>1.1.0</version>
+		</dependency>
+
+
+
+	</dependencies>
+	<!-- <dependencyManagement> <dependencies> <dependency> <groupId>commons-httpclient</groupId> 
+		<artifactId>commons-httpclient</artifactId> <scope>compile</scope> <version>3.1.0</version> 
+		<systemPath>/Users/craigm/Downloads/hadoop-2.6.0/share/hadoop/tools/lib/commons-httpclient-3.1.jar</systemPath> 
+		</dependency> </dependencies> </dependencyManagement> -->
+	<build>
+
+		<resources>
+			<resource>
+				<directory>src/main/templates</directory>
+				<includes>
+					<include>**/*.java</include>
+				</includes>
+				<filtering>true</filtering>
+				<targetPath>${project.build.directory}/generated-sources/version</targetPath>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+		</resources>
+
+		<plugins>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>1.8</version>
+				<executions>
+					<execution>
+						<id>add-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${project.build.directory}/generated-sources/version/</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>${fully.qualified.main.class}</mainClass>
+						</manifest>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- Assemble the CSD. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<appendAssemblyId>false</appendAssemblyId>
+
+				</configuration>
+				<executions>
+					<execution>
+						<id>jar-with-dependencies</id>
+						<!-- builds the jar-with-dependencies -->
+						<phase>package</phase> <!-- bind to the packaging phase -->
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<finalName>${project.name}-${project.version}</finalName>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+						</configuration>
+					</execution>
+
+					<execution>
+						<id>make-assembly</id>
+						<phase>assembly</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<finalName>ProBoS-${project.version}</finalName>
+							<descriptors>
+								<descriptor>src/assembly/parcel.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- <plugin> <groupId>com.github.goldin</groupId> <artifactId>copy-maven-plugin</artifactId> 
+				<version>0.2.5</version> <executions> <execution> <id>create-archive</id> 
+				<phase>package</phase> <goals> <goal>copy</goal> </goals> <configuration> 
+				<resources> <resource> <targetPath>${project.build.directory}</targetPath> 
+				<file>${project.build.directory}/${project.build.finalName}.tar.gz</file> 
+				<destFileName>${project.build.finalName}.parcel</destFileName> </resource> 
+				</resources> </configuration> </execution> </executions> </plugin> -->
+
+		</plugins>
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.codehaus.mojo
+										</groupId>
+										<artifactId>
+											build-helper-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.8,)
+										</versionRange>
+										<goals>
+											<goal>add-source</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 
 </project>

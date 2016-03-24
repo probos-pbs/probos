@@ -14,8 +14,8 @@ do
 done
 BIN_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-JAR=probos-0.1-SNAPSHOT.jar
-JAR=probos-0.1-SNAPSHOT-jar-with-dependencies.jar
+JAR=probos-*.jar
+
 if [ "$PROBOS_CONF_DIR" == "" ];
 then
 	if [ -e "/etc/probos/" ];
@@ -44,6 +44,11 @@ then
 	class=$PREFIX/ControllerServer
 	runner=yarn
 	export YARN_OPTS="$YARN_OPTS -Dcom.sun.management.jmxremote -Dprobos.home=$PROBOS_HOME -Dprobos.conf=$PROBOS_CONF_DIR -Dprobos.kitten.master.jar=`ls $PROBOS_LIB/kitten-master-0.*.*-jar-with-dependencies.jar`"
+	if [ -e "$PROBOS_CONF_DIR/log4j.properties" ];
+	then
+		export YARN_OPTS="$YARN_OPTS -Dlog4j.configuration=file:$PROBOS_CONF_DIR/log4j.properties "
+		# -Dlog4j.debug=true 
+	fi
 	#export YARN_OPTS="$YARN_OPTS -Dsun.security.krb5.debug=true -Xdebug -Xrunjdwp:transport=dt_socket,server=y,address=8765"
 	export YARN_ROOT_LOGGER=DEBUG,console
 elif [ "$CMD" == "pbs_appmaster" ];
