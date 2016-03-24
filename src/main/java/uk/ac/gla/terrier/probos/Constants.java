@@ -4,19 +4,8 @@ import java.io.File;
 
 public class Constants {
 
-//	static {
-////		if (System.getenv("JAVA_HOME") == null || System.getenv("JAVA_HOME").length() == 0)
-////		{
-////			throw new RuntimeException("Env var JAVA_HOME not defined");
-////		}
-//		if (System.getenv("HADOOP_HOME") == null || System.getenv("HADOOP_HOME").length() == 0)
-//		{
-//			throw new RuntimeException("Env var HADOOP_HOME not defined");
-//		}
-//	}
-	
 	public static final String PRODUCT_NAME = "probos";
-	public static final String PRODUCT_VERSION = "0.2.10-SNAPSHOT";
+	public static final String PRODUCT_VERSION = Version.VERSION;
 	public static final String DIRECTIVE_PREFIX = "#PBS";
 	public static final int DEFAULT_CONTROLLER_PORT = 8027;
 		
