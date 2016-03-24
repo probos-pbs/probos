@@ -8,5 +8,16 @@ The Cloudera Manager documentation described the [Installation of a CSD](http://
 
 
 ## Building a CSD jar file
+Clone the probos-csd directory. Use Maven (`mvn package`) to build the CSD jar file. The CSD file will be in the target directory. Then follow Cloudera's instructions on [installation of the CSD](http://www.cloudera.com/documentation/enterprise/5-4-x/topics/cm_mc_addon_services.html).
 
-## Building a parcel 
+Roughly:
+
+    sudo cp distribution/target/BLUR-0.2.4.jar /opt/cloudera/csd/BLUR-0.2.4.jar
+    sudo service cloudera-scm-server restart
+
+
+## Building a parcel
+
+	mvn assembly:single
+	
+	
