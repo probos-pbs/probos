@@ -6,8 +6,9 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.Container;
 import org.apache.hadoop.yarn.api.records.ContainerId;
@@ -20,7 +21,7 @@ import com.google.common.collect.Lists;
 public class ProbosApplicationMasterDistributedServiceImpl extends
 		ProbosApplicationMasterServiceImpl {
 
-	private static final Log LOG = LogFactory.getLog(ProbosApplicationMasterDistributedServiceImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ProbosApplicationMasterDistributedServiceImpl.class);
 	final List<NodeId> allocatedNodes = Lists.newArrayList();
 	final AtomicBoolean broken = new AtomicBoolean(false);
 	CountDownLatch superiorLatch;	

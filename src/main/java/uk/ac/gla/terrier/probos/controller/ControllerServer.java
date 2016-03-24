@@ -17,7 +17,6 @@ import java.net.InetSocketAddress;
 import java.net.URL;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,8 +27,6 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -42,7 +39,6 @@ import org.apache.hadoop.security.Credentials;
 import org.apache.hadoop.security.SecurityUtil;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.security.token.Token;
-import org.apache.hadoop.security.token.TokenIdentifier;
 import org.apache.hadoop.security.token.delegation.AbstractDelegationTokenSecretManager;
 import org.apache.hadoop.yarn.api.records.ApplicationAttemptId;
 import org.apache.hadoop.yarn.api.records.ApplicationAttemptReport;
@@ -56,6 +52,8 @@ import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.exceptions.ContainerNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.gla.terrier.probos.Constants;
 import uk.ac.gla.terrier.probos.JobUtils;
@@ -161,7 +159,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 	}
 	
 	private static final Random random = new Random();
-	private static final Log LOG = LogFactory.getLog(ControllerServer.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ControllerServer.class);
 	
 	private Map<String, Object> extraLuaValues = ImmutableMap.<String, Object>of();
 	private Map<String, String> extraLocalResources = ImmutableMap.<String, String>of();
@@ -215,7 +213,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 	final WebServer webServer;
 	YarnClient yClient;
 	MailClient mClient;
-
+	final Path probosFolder;
 	
 	protected void mailEvent(int jobid, PBSJob job, MailEvent event, String additionalContent)
 	{
@@ -289,10 +287,20 @@ public class ControllerServer extends AbstractService implements PBSClient {
 		if (bindAddress == null)
 			throw new IllegalArgumentException(PConfiguration.KEY_CONTROLLER_BIND_ADDRESS + " cannot be null");
 		
-		secretManager = new ControllerAPISecretManager(3600 *1000, 
-				3600 *1000, 
-				3600 *1000, 
-				3600 *1000);
+		secretManager = new ControllerAPISecretManager(
+				//delegationKeyUpdateInterval
+				//renewal interval for delegation token
+				24 * 3600 *1000, //Yarn default is 1 day
+				
+				//delegationTokenMaxLifetime -- maximum lifetime for which a delegation token is valid
+				//i.e. how long can we keep renewing the token for?
+				7 * 24 * 3600 *1000, //Yarn default is 7 days
+				
+				//delegationTokenRenewInterval -- how long should a token last?
+				24 * 3600 *1000, //Yarn default is 1 day
+				
+				//delegationTokenRemoverScanInterval -- how often are expired keys removed?
+				3600 *1000); //Yarn default is 1 hour
 		
 		//build the client rpc server: 8027
 		clientRpcserver = new RPC.Builder(yConf).
@@ -342,6 +350,20 @@ public class ControllerServer extends AbstractService implements PBSClient {
 		//this thread detects yarn jobs that have ended
 		watcherThread = new Thread(new ControllerWatcher());
 		watcherThread.setName(ControllerWatcher.class.getSimpleName());
+		
+		//ensure we have the directory
+		Path _probosFolder = new Path(pConf.get(PConfiguration.KEY_CONTROLLER_JOBDIR));
+		FileSystem controllerFS = FileSystem.get(yConf);
+		if (! _probosFolder.isUriPathAbsolute())
+		{
+			_probosFolder = _probosFolder.makeQualified(controllerFS.getUri(), controllerFS.getWorkingDirectory());
+			assert _probosFolder.isUriPathAbsolute();
+		}
+		probosFolder = _probosFolder;
+		if (! controllerFS.exists( probosFolder ))
+		{
+			throw new IllegalArgumentException(probosFolder.toString() + " does not exist");
+		}
 	}
 	
 	@Override
@@ -351,7 +373,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 		try{
 			secretManager.startThreads();
 		}catch (IOException ioe) {
-			LOG.error(ioe);
+			LOG.error("Failed to start secretmanager", ioe);
 		}
 		interactiveRpcserver.start();		
 		LOG.info("Ready to serve RPC requests");
@@ -438,8 +460,9 @@ public class ControllerServer extends AbstractService implements PBSClient {
 	protected boolean storeJobScript(final JobInformation ji, final String requestorUserName, final byte[] source) throws IOException
 	{
 		final String jobFolderName = String.valueOf(Math.abs(random.nextInt()));
-		final Path jobFolder = new Path(pConf.get(PConfiguration.KEY_CONTROLLER_JOBDIR), jobFolderName);
-		final Path script = new Path(pConf.get(PConfiguration.KEY_CONTROLLER_JOBDIR),jobFolderName + ".SC");
+		
+		final Path jobFolder = new Path(probosFolder, jobFolderName);
+		final Path script = new Path(probosFolder,jobFolderName + ".SC");
 		PrivilegedExceptionAction<Path> submitAction = new PrivilegedExceptionAction<Path>() {
 		  public Path run() throws Exception {
 			  FileSystem fs = FileSystem.get(yConf);			  
@@ -1144,7 +1167,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 
 		@Override
 		public void jobEvent(int jobId, EventType e, String containerId, String statusMessage) {
-			renewToken();
+			//renewToken(jobId);
 			
 			LOG.info("Job=" + jobId + " Event="+e.toString() + " container="+containerId.toString());
 			JobInformation ji = jobArray.get(jobId);
@@ -1195,7 +1218,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 		public void jobArrayTaskEvent(int jobId, int arrayId, EventType e,
 				String containerId, String message) {
 			
-			renewToken();
+			//renewToken(jobId);
 			
 			LOG.info("Job=" + jobId + " Array="+arrayId+" Event="+e.toString() + " container="+containerId.toString()  + " message=" + message);
 			JobInformation ji = jobArray.get(jobId);
@@ -1229,7 +1252,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 		@Override
 		public int getDistributedHostCount(int jobId) {
 			
-			renewToken();
+			//renewToken(jobId);
 			JobInformation ji = jobArray.get(jobId);
 			
 			//prevent NPE
@@ -1242,27 +1265,47 @@ public class ControllerServer extends AbstractService implements PBSClient {
 		}
 		
 		@Override
-		public void heartbeat(int jobId) {
-			renewToken();
+		public long heartbeat(int jobId, Token<ProbosDelegationTokenIdentifier> token) throws Exception {
+			LOG.info("Master heartbeat received from " + jobId);
+			return renewToken(jobId, token);
 		}
 		
-		@SuppressWarnings("unchecked")
-		protected void renewToken()
+		protected long renewToken(int jobId, Token<ProbosDelegationTokenIdentifier> token)
+				throws Exception
 		{
-			try{
-				UserGroupInformation currentUser = UserGroupInformation.getCurrentUser();
-				Collection<Token<? extends TokenIdentifier>> toks = currentUser.getTokens();
-				for(Token<? extends TokenIdentifier> tok : toks)
-				{
-					if (tok.getKind().equals(ProbosDelegationTokenIdentifier.KIND_NAME)){
-						secretManager.renewToken(
-								(Token<ProbosDelegationTokenIdentifier>) tok, 
-								currentUser.getUserName());
-					}
-				}
-			} catch (Exception e) {
-				LOG.warn("Problem renewing token", e);
-			}
+			JobInformation ji = jobArray.get(jobId);
+			
+			final long newExpiry = secretManager.renewToken(
+					token, 
+					ji.proxyUser.getUserName());
+			LOG.info("Renewed token " + token.toString() + ", new expiry="+newExpiry );
+			
+			return newExpiry;
+//			try{
+//				int count = 0;
+//				//TODO security check - is the owner the same as the owner of the job?
+//				
+//				LOG.warn("Server.getRemoteUser()="+ Server.getRemoteUser().toString());
+//				LOG.warn("UserGroupInformation.getCurrentUser()="+ UserGroupInformation.getCurrentUser().toString());
+//				
+//				UserGroupInformation currentUser = Server.getRemoteUser();
+//						//UserGroupInformation.getCurrentUser();
+//				Collection<Token<? extends TokenIdentifier>> toks = currentUser.getTokens();
+//				LOG.debug("Current user has " + toks.size() + " tokens");
+//				for(Token<? extends TokenIdentifier> tok : toks)
+//				{
+//					LOG.debug("Checking if " + tok.toString() + " should be renewed");
+//					if (tok.getKind().equals(ProbosDelegationTokenIdentifier.KIND_NAME)){
+//						secretManager.renewToken(
+//								(Token<ProbosDelegationTokenIdentifier>) tok, 
+//								currentUser.getUserName());
+//						count++;
+//					}
+//				}
+//				LOG.info("Renewed "+ count + " " + ProbosDelegationTokenIdentifier.KIND_NAME + " tokens");
+//			} catch (Exception e) {
+//				LOG.warn("Problem renewing token", e);
+//			}
 		}
 
 		
@@ -1337,7 +1380,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
-					LOG.error(e);
+					LOG.warn("Interrupted while sleeping", e);
 					run = false;
 				}
 			}

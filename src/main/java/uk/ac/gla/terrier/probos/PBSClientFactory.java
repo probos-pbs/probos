@@ -3,8 +3,9 @@ package uk.ac.gla.terrier.probos;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.ipc.RPC;
 import org.apache.hadoop.net.NetUtils;
@@ -22,7 +23,7 @@ import uk.ac.gla.terrier.probos.api.PBSClient;
  */
 public class PBSClientFactory {
 
-	private static final Log LOG = LogFactory.getLog(PBSClientFactory.class);
+	private static final Logger LOG = LoggerFactory.getLogger(PBSClientFactory.class);
 	
 	private static PBSClient forcedClient = null;
 	

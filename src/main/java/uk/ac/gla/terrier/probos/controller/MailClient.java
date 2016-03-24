@@ -21,8 +21,9 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.StringUtils;
 
@@ -43,7 +44,7 @@ public abstract class MailClient implements Closeable {
 	
 	static class LoggingMailClient extends MailClient
 	{
-		private static final Log LOG = LogFactory.getLog(MailClient.class);
+		private static final Logger LOG = LoggerFactory.getLogger(MailClient.class);
 		MailClient parent;
 		LoggingMailClient(MailClient _parent)
 		{

@@ -11,22 +11,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.ipc.RPC;
 import org.apache.hadoop.net.NetUtils;
 import org.apache.hadoop.security.Credentials;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.security.token.Token;
+import org.apache.hadoop.security.token.TokenRenewer;
 import org.apache.hadoop.yarn.api.records.ContainerId;
 import org.apache.hadoop.yarn.api.records.ContainerStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.gla.terrier.probos.PBSClientFactory;
 import uk.ac.gla.terrier.probos.Utils;
 import uk.ac.gla.terrier.probos.api.PBSClient;
 import uk.ac.gla.terrier.probos.api.PBSMasterClient;
 import uk.ac.gla.terrier.probos.api.PBSMasterClient.EventType;
+import uk.ac.gla.terrier.probos.api.ProbosDelegationTokenIdentifier;
 import uk.ac.gla.terrier.probos.common.BaseServlet;
 import uk.ac.gla.terrier.probos.common.MapEntry;
 import uk.ac.gla.terrier.probos.common.WebServer;
@@ -42,29 +45,39 @@ public class ProbosApplicationMasterServiceImpl extends ApplicationMasterService
 
 	static final String[] REQUIRED_ENV = new String[]{"PBS_CONTROLLER", "PBS_JOBID", "CONTAINER_ID"};
 	
-	private static final long HEARTBEAT_INTERVAL_MS = 30 * 1000;
+	private static final long HEARTBEAT_INTERVAL_MS = 3600 * 1000;
 	
-	private static final Log LOG = LogFactory.getLog(ProbosApplicationMasterServiceImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ProbosApplicationMasterServiceImpl.class);
 	final PBSMasterClient masterClient;
 	final PBSClient controllerClient;
 	final WebServer webServer;
 	final String container;
 	final int jobId;
 	final Configuration conf;
+	final List<Token<ProbosDelegationTokenIdentifier>> probosTokens;
+	final ProbosTokenRenewer renewer;
 	long lastHeartbeat = 0;
 	
+	
+	@SuppressWarnings("unchecked")
 	public ProbosApplicationMasterServiceImpl(
 			ApplicationMasterParameters parameters, Configuration _conf) throws Exception {
 		super(parameters, _conf);
 		LOG.info("Starting " + this.getClass().getSimpleName() + " on "+ Utils.getHostname());
 
 		Credentials credentials = UserGroupInformation.getCurrentUser().getCredentials();
+		probosTokens = new ArrayList<Token<ProbosDelegationTokenIdentifier>>();
 		Iterator<Token<?>> iter = credentials.getAllTokens().iterator();
         LOG.info("Executing on "+Utils.getHostname()+" with tokens:");
         while (iter.hasNext()) {
           Token<?> token = iter.next();
-          LOG.info(token);
+          LOG.info(token.toString());
+          if (token.getKind().equals(ProbosDelegationTokenIdentifier.KIND_NAME))
+          {        	 
+        	  probosTokens.add((Token<ProbosDelegationTokenIdentifier>) token);
+          }
         }
+        renewer = new ProbosTokenRenewer();
         
 		this.conf = _conf;
 		StringWriter sw = new StringWriter();
@@ -96,7 +109,7 @@ public class ProbosApplicationMasterServiceImpl extends ApplicationMasterService
 		masterClient.jobEvent(jobId, EventType.MASTER_START, container, null);		
 		
 		final List<Entry<String,BaseServlet>> masterServlets = new ArrayList<Entry<String,BaseServlet>>();
-		masterServlets.add(new MapEntry<String,BaseServlet>( "/", new JobProgressServlet("/", masterServlets, controllerClient, this)));
+		masterServlets.add(new MapEntry<String,BaseServlet>("/", new JobProgressServlet("./", masterServlets, controllerClient, this)));
 		masterServlets.add(new MapEntry<String,BaseServlet>("/qstatjob", new QstatJobServlet("./qstatjob", masterServlets, controllerClient, this)));	
 		masterServlets.add(new MapEntry<String,BaseServlet>("/conf", new ConfServlet("./conf", masterServlets, controllerClient, this)));
 		//0 means any random free port
@@ -119,7 +132,11 @@ public class ProbosApplicationMasterServiceImpl extends ApplicationMasterService
 		final long now = System.currentTimeMillis();
 		if (now - lastHeartbeat> HEARTBEAT_INTERVAL_MS)
 		{
-			masterClient.heartbeat(jobId);
+			for(Token<ProbosDelegationTokenIdentifier> t : probosTokens)
+			{
+				//masterClient.heartbeat(jobId, t);
+				renewer.renew(t, this.conf);
+			}
 			lastHeartbeat = System.currentTimeMillis();
 		}
 		super.runOneIteration();
@@ -254,6 +271,41 @@ public class ProbosApplicationMasterServiceImpl extends ApplicationMasterService
 				message = s.toString();
 			}
 			return message;
+		}
+		
+	}
+	
+	class ProbosTokenRenewer extends TokenRenewer
+	{
+		
+		private ProbosTokenRenewer() {}
+		
+
+		@Override
+		public boolean handleKind(Text kind) {
+			return ProbosDelegationTokenIdentifier.KIND_NAME.equals(kind);
+		}
+
+		@Override
+		public boolean isManaged(Token<?> token) throws IOException {
+			return true;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public long renew(Token<?> token, Configuration conf)
+				throws IOException, InterruptedException {
+			try{
+				return masterClient.heartbeat(jobId, (Token<ProbosDelegationTokenIdentifier>) token);
+			}catch (Exception e) {
+				throw new IOException(e);
+			}			
+		}
+
+		@Override
+		public void cancel(Token<?> token, Configuration conf)
+				throws IOException, InterruptedException {
+			throw new UnsupportedOperationException();
 		}
 		
 	}

@@ -3,6 +3,7 @@ package uk.ac.gla.terrier.probos.api;
 import org.apache.hadoop.ipc.ProtocolInfo;
 import org.apache.hadoop.ipc.VersionedProtocol;
 import org.apache.hadoop.security.KerberosInfo;
+import org.apache.hadoop.security.token.Token;
 import org.apache.hadoop.security.token.TokenInfo;
 
 import uk.ac.gla.terrier.probos.PConfiguration;
@@ -33,6 +34,6 @@ public interface PBSMasterClient extends VersionedProtocol {
 	
 	public int getDistributedHostCount(int jobId);
 	
-	public void heartbeat(int jobId);
+	public long heartbeat(int jobId, Token<ProbosDelegationTokenIdentifier> token) throws Exception;
 	
 }

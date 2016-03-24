@@ -11,8 +11,9 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.security.Credentials;
@@ -37,7 +38,7 @@ import uk.ac.gla.terrier.probos.api.PBSJobStatusDistributed;
 /** This implementation is pretty basic at present */
 public class pbsdsh extends Configured implements Tool {
 
-	private static final Log LOG = LogFactory.getLog(pbsdsh.class);
+	private static final Logger LOG = LoggerFactory.getLogger(pbsdsh.class);
 	private PBSClient c;
 	
 	public pbsdsh(PBSClient _c) throws IOException
@@ -58,7 +59,7 @@ public class pbsdsh extends Configured implements Tool {
         LOG.debug("Executing with tokens:");
         while (iter.hasNext()) {
           Token<?> token = iter.next();
-          LOG.debug(token);
+          LOG.debug(token.toString());
           if (token.getKind().equals(AMRMTokenIdentifier.KIND_NAME)) {
             iter.remove();
           }
@@ -184,7 +185,7 @@ public class pbsdsh extends Configured implements Tool {
 			channel.open().await();	       
 	        channel.waitFor(Arrays.asList(ClientChannelEvent.CLOSED, ClientChannelEvent.TIMEOUT), 0);
         } catch (Exception e) {
-			LOG.error(e);
+			LOG.error("Problem creating channel", e);
 			rtr = 1;
 		} finally {
 			session.close(false);

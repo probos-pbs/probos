@@ -1,5 +1,12 @@
 #Changes
 
+v0.2.10 - March 2015
+ * Mavenize more, including version numbering
+ * Fix sendmail
+ * Fix unit tests and controller viz. absolute file paths
+ * Use SLF4j and log4j, to permit CSD to configure logging
+ * Fix token renewal
+
 v0.2.9 - February 2015
  * Tokens need to be renewed through master heartbeat
  * qsub should ignore the TERMCAP variable

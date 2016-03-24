@@ -8,8 +8,9 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.ipc.RPC;
@@ -32,7 +33,7 @@ import uk.ac.gla.terrier.probos.api.PBSInteractiveClient;
 
 public abstract class ProbosJobService extends Configured implements Tool {
 
-	protected static final Log LOG = LogFactory.getLog(ProbosJobService.class);
+	protected static final Logger LOG = LoggerFactory.getLogger(ProbosJobService.class);
 	
 	Configuration c = null;
 	protected final AtomicBoolean running = new AtomicBoolean();
@@ -64,7 +65,7 @@ public abstract class ProbosJobService extends Configured implements Tool {
 	        LOG.info("Executing with tokens:");
 	        while (iter.hasNext()) {
 	          Token<?> token = iter.next();
-	          LOG.info(token);
+	          LOG.info(token.toString());
 	          if (token.getKind().equals(AMRMTokenIdentifier.KIND_NAME)) {
 	            iter.remove();
 	          }

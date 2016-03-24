@@ -16,8 +16,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 
@@ -38,7 +39,7 @@ public class KittenUtils2 {
 	@VisibleForTesting
 	public static final boolean DEBUG_TASKS = false;
 	
-	protected static final Log LOG = LogFactory.getLog(KittenUtils2.class);
+	protected static final Logger LOG = LoggerFactory.getLogger(KittenUtils2.class);
 	
 	Configuration pConf;
 	int jobid;
@@ -230,7 +231,10 @@ public class KittenUtils2 {
 	}
 
 	protected void printTaskContainer(String jt_id, Path targetScript, PrintWriter w, String prefix, Map<String,String> extraEnv, NodeRequest nr)
-	{					
+	{	
+		//its important to have an absolute path, lets just check this here
+		assert targetScript.isUriPathAbsolute() : targetScript.toString() + " is not absolute";
+		
 		w.println(prefix + "resources = {");
 		w.println(prefix + " [\"job.SC\"] = { hdfs = \""+ targetScript.toString() +"\" },");
 		w.println(prefix + "},");
@@ -286,7 +290,7 @@ public class KittenUtils2 {
 	
 	protected String finalCommentPrefix()
 	{
-		return "mkdir $(pwd)/tmp; "; //make a tmp directory
+		return "mkdir -p $(pwd)/tmp; "; //make a tmp directory
 	}
 	
 	protected String finalCommentSuffix()
