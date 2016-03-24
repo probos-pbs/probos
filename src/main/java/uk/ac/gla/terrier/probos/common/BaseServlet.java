@@ -40,7 +40,10 @@ public abstract class BaseServlet extends HttpServlet {
 			}
 			else
 			{
-				ps.println("<a href='"+servlet.getKey()+"'>"+servlet.getValue().name + "</a>");
+				ps.println("<a href='"
+						+ "./" //big hack to make the link on the job's AM proxy work
+						+servlet.getKey()+"'>"
+						+servlet.getValue().name + "</a>");
 			}
 			ps.println("&nbsp;&nbsp;&nbsp;&nbsp;");
 		}
@@ -52,7 +55,23 @@ public abstract class BaseServlet extends HttpServlet {
 		
 		resp.setContentType("text/html");
 		PrintStream ps = new PrintStream(resp.getOutputStream());
-		ps.println("<html><head><title>"+name+"</title></head><body>");
+		
+		ps.println("<html><head><title>"+name+"</title>");
+		ps.println("<style> .watermark {");
+		ps.println(" opacity: 0.5;");
+		ps.println(" color: BLACK;");
+		ps.println(" position: inline-block; z-index: 99999;");
+		ps.println(" position:fixed; margin:auto;");
+		ps.println(" top:0; bottom:0; display: inline-block;");
+		ps.println(" left:0; right:0; width:640px; height:640px;");
+		
+		ps.println("} </style>");
+		ps.println("</head>");
+		ps.println("<body>");
+		ps.println("<div class=\"watermark\">");
+		ps.println("<img src=\"images/elephant-parade-trier-182187_640.jpg\">");
+		ps.println("</div>");
+		
 		this.printNav(ps);
 		ps.println("<pre>");
 		getPreformattedContent(req, resp, ps);
