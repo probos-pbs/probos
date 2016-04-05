@@ -1328,7 +1328,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 							return true;
 						if (service.isRunning())
 						{
-							LOG.info("Job " + jobId + " containers="+service.getApplicationReport().getApplicationResourceUsageReport().getNumUsedContainers()+"  progress=" + service.getApplicationReport().getProgress());
+							LOG.debug("Job " + jobId + " containers="+service.getApplicationReport().getApplicationResourceUsageReport().getNumUsedContainers()+"  progress=" + service.getApplicationReport().getProgress());
 						} else {
 							ApplicationReport report = service.getFinalReport();
 							LOG.info("Job "+jobId+" finished: " + report);
