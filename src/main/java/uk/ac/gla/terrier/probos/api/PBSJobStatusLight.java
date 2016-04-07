@@ -19,11 +19,12 @@ public class PBSJobStatusLight implements Writable {
 	String timeUse;
 	char state;
 	String queue;
+	String trackingURL = null;
 	
 	public PBSJobStatusLight(){}
 	
 	public PBSJobStatusLight(int jobId, boolean isArray, String jobName, String jobOwner,
-			String timeUse, char state, String queue) {
+			String timeUse, char state, String queue, String trackingURL) {
 		super();
 		this.jobId = jobId;
 		this.array = isArray;
@@ -32,6 +33,7 @@ public class PBSJobStatusLight implements Writable {
 		this.timeUse = timeUse;
 		this.state = state;
 		this.queue = queue;
+		this.trackingURL = trackingURL;
 	}	
 	public int getJobId() {
 		return jobId;
@@ -51,6 +53,12 @@ public class PBSJobStatusLight implements Writable {
 	public String getTimeUse() {
 		return timeUse;
 	}
+	
+	public String getTrackingURL()
+	{
+		return trackingURL;
+	}
+	
 	public char getState() {
 		return state;
 	}

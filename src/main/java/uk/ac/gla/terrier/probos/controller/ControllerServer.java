@@ -756,6 +756,10 @@ public class ControllerServer extends AbstractService implements PBSClient {
 				? "0"
 				: Utils.makeTime( appReport.getApplicationResourceUsageReport().getVcoreSeconds() );
 		
+		String appURL = appReport == null
+				? ""
+				: appReport.getTrackingUrl();
+		
 		PBSJobStatusLight rtr = null;
 		String nodes = null;
 		List<ContainerReport> cReports = null;
@@ -769,7 +773,8 @@ public class ControllerServer extends AbstractService implements PBSClient {
 					job!= null ? job.getJob_Owner() : null, 
 					timeUse, 
 					state, 
-					job!= null ? job.getQueue() : null
+					job!= null ? job.getQueue() : null,
+					appURL
 					);
 		}
 		else if (requestType == 4)
@@ -782,6 +787,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 					job!= null ? job.getJob_Owner() : null,
 					timeUse, state, 
 					job!= null ? job.getQueue() : null, 
+					appURL,
 					jii != null ? jii.hostname : null, 
 					jii != null ? jii.port : -1 , 
 					jii != null ? jii.secret : null);
@@ -800,6 +806,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 					job!= null ? job.getJob_Owner() : null,
 					timeUse, state, 
 					job!= null ? job.getQueue() : null, 
+					appURL,
 					hostnames, 
 					ports, 
 					secret);
@@ -839,6 +846,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 						timeUse, 
 						state, 
 						job!= null ? job.getQueue() : null,
+						appURL,
 						nodes
 						);
 			}
@@ -907,6 +915,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 						timeUse, 
 						state, 
 						job!= null ? job.getQueue() : null,
+						appURL,
 						arrayIds,
 						states
 						);

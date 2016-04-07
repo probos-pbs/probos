@@ -17,9 +17,9 @@ public class PBSJobStatusDistributed extends PBSJobStatusLight {
 	}
 
 	public PBSJobStatusDistributed(int jobId, boolean isArray, String jobName,
-			String jobOwner, String timeUse, char state, String queue,
+			String jobOwner, String timeUse, char state, String queue, String trackingURL,
 			String[] hostnames, int[] ports, String secret) {
-		super(jobId, isArray, jobName, jobOwner, timeUse, state, queue);
+		super(jobId, isArray, jobName, jobOwner, timeUse, state, queue, trackingURL);
 		this.hostnames = hostnames;
 		this.ports = ports;
 		this.secret = secret;

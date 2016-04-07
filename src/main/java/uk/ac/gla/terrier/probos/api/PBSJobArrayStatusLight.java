@@ -15,8 +15,8 @@ public class PBSJobArrayStatusLight extends PBSJobStatusLight {
 	}
 	
 	public PBSJobArrayStatusLight(int jobId, String jobName,
-			String jobOwner, String timeUse, char state, String queue, int[] arrayIds, char[] states /*, String[] walltimes */) {
-		super(jobId, true, jobName, jobOwner, timeUse, state, queue);
+			String jobOwner, String timeUse, char state, String queue, String trackingURL, int[] arrayIds, char[] states /*, String[] walltimes */) {
+		super(jobId, true, jobName, jobOwner, timeUse, state, queue, trackingURL);
 		this.arrayIds = arrayIds;
 		this.states = states;
 		//this.walltimes = walltimes;

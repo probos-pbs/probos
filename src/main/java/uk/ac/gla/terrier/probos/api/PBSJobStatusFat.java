@@ -13,14 +13,13 @@ public class PBSJobStatusFat extends PBSJobStatusNodes {
 	String masterContainer = null;
 	String yarnAppId = null;
 	String[] taskContainerIds = null;
-	String trackingURL = null;
 	
 	public PBSJobStatusFat(){}
 	
 	public PBSJobStatusFat(int jobId, boolean isArray, String jobName, String jobOwner,
 			String timeUse, char state, String queue, String nodes, PBSJob job, 
 			String mContainer, String[] tContainers, String trackingURL, String yarnAppId) {
-		super(jobId, isArray, jobName, jobOwner, timeUse, state, queue, nodes);
+		super(jobId, isArray, jobName, jobOwner, timeUse, state, queue, trackingURL, nodes);
 		this.job = job;
 		this.masterContainer = mContainer;
 		this.taskContainerIds = tContainers;

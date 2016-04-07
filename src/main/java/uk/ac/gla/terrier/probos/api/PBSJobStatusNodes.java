@@ -16,8 +16,8 @@ public class PBSJobStatusNodes extends PBSJobStatusLight {
 	}
 
 	public PBSJobStatusNodes(int jobId, boolean isArray, String jobName, String jobOwner,
-			String timeUse, char state, String queue, String nodes) {
-		super(jobId, isArray, jobName, jobOwner, timeUse, state, queue);
+			String timeUse, char state, String queue, String trackingURL, String nodes) {
+		super(jobId, isArray, jobName, jobOwner, timeUse, state, queue, trackingURL);
 		this.nodes = nodes;
 	}
 	
