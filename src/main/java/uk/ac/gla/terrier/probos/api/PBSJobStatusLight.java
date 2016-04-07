@@ -79,6 +79,7 @@ public class PBSJobStatusLight implements Writable {
 		jobOwner =  Utils.readStringOrNull(in);
 		queue = Utils.readStringOrNull(in);	
 		timeUse = Utils.readStringOrNull(in);
+		trackingURL = Utils.readStringOrNull(in);
 		state = in.readChar();
 	}
 	
@@ -91,6 +92,7 @@ public class PBSJobStatusLight implements Writable {
 		Utils.writeStringOrNull(out, jobOwner);
 		Utils.writeStringOrNull(out, queue);
 		Utils.writeStringOrNull(out, timeUse);
+		Utils.writeStringOrNull(out, trackingURL);
 		out.writeChar(state);
 	}
 }

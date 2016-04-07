@@ -31,11 +31,11 @@ public class TestQstat {
 				throws Exception {
 			if (jobId == 1)
 				if (requestType == 0)
-					return new PBSJobStatusLight(1, false, "testJob", System.getProperty("user.name"), "00:01:59", 'R', "default");
+					return new PBSJobStatusLight(1, false, "testJob", System.getProperty("user.name"), "00:01:59", 'R', "default", null);
 				else if (requestType == 1)
-					return new PBSJobStatusNodes(1, false, "testJob", System.getProperty("user.name"), "00:01:59", 'R', "default", 
+					return new PBSJobStatusNodes(1, false, "testJob", System.getProperty("user.name"), "00:01:59", 'R', "default", null,
 						"node01");
-			return new PBSJobStatusLight(1, false, null, null, null, '?', null);
+			return new PBSJobStatusLight(1, false, null, null, null, '?', null, null);
 		}
 	};
 	
@@ -50,14 +50,14 @@ public class TestQstat {
 				throws Exception {
 			if (jobId == 1)
 				if (requestType == 0)
-					return new PBSJobStatusLight(1, true, "testJob", System.getProperty("user.name"), "00:01:59", 'R', "default");
+					return new PBSJobStatusLight(1, true, "testJob", System.getProperty("user.name"), "00:01:59", 'R', "default", null);
 				else if (requestType == 1)
-					return new PBSJobStatusNodes(1, true, "testJob", System.getProperty("user.name"), "00:01:59", 'R', "default", 
+					return new PBSJobStatusNodes(1, true, "testJob", System.getProperty("user.name"), "00:01:59", 'R', "default", null, 
 						"node01");
 				else if (requestType == 3)
-					return new PBSJobArrayStatusLight(1, "testJob", System.getProperty("user.name"), "00:01:59", 'R', "default", 
+					return new PBSJobArrayStatusLight(1, "testJob", System.getProperty("user.name"), "00:01:59", 'R', "default", null, 
 							new int[]{5,6,7}, new char[]{'C', 'R', 'Q'});
-			return new PBSJobStatusLight(1, false, null, null, null, '?', null);
+			return new PBSJobStatusLight(1, false, null, null, null, '?', null, null);
 		}
 	};
 	

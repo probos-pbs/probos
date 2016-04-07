@@ -26,13 +26,14 @@ public class TestPBSLightJobStatus {
 		assertEquals(status.getQueue(), newStatus.getQueue());
 		assertEquals(status.getTimeUse(), newStatus.getTimeUse());
 		assertEquals(status.getState(), newStatus.getState());
+		assertEquals(status.getTrackingURL(), newStatus.getTrackingURL());
 		
 	}
 	
 	@Test public void testWritable() throws Exception
 	{
 		testWritable(new PBSJobStatusLight());
-		testWritable(new PBSJobStatusLight(1, false, "test", "me", "0", 'E', "default"));
+		testWritable(new PBSJobStatusLight(1, false, "test", "me", "0", 'E', "default", "http:/a/b"));
 		
 	}
 	
