@@ -1396,7 +1396,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
-					LOG.warn("Interrupted while sleeping", e);
+					LOG.debug("Interrupted while sleeping", e);
 					run = false;
 				}
 			}
