@@ -1,5 +1,9 @@
 #Changes
 
+v0.2.11 - April 2015
+ * Added tracking URL to qstat output
+ * Clarified logging in Controller viz RPC port numbers
+
 v0.2.10 - March 2015
  * Mavenize more, including version numbering
  * Fix sendmail

@@ -4,7 +4,7 @@
 	<groupId>uk.ac.gla.terrier</groupId>
 	<artifactId>probos</artifactId>
 	<packaging>jar</packaging>
-	<version>0.2.10-SNAPSHOT</version>
+	<version>0.2.11-SNAPSHOT</version>
 	<name>probos</name>
 	<properties>
 		<slf4j.version>1.7.14</slf4j.version>
