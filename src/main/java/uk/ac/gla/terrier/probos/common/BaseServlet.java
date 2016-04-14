@@ -40,9 +40,11 @@ public abstract class BaseServlet extends HttpServlet {
 			}
 			else
 			{
+				String name = ("./" //big hack to make the link on the job's AM proxy work
+						+servlet.getKey()).replaceFirst("//", "/");
 				ps.println("<a href='"
-						+ "./" //big hack to make the link on the job's AM proxy work
-						+servlet.getKey()+"'>"
+						+ name
+						+"'>"
 						+servlet.getValue().name + "</a>");
 			}
 			ps.println("&nbsp;&nbsp;&nbsp;&nbsp;");
@@ -69,13 +71,17 @@ public abstract class BaseServlet extends HttpServlet {
 		ps.println("</head>");
 		ps.println("<body>");
 		ps.println("<div class=\"watermark\">");
-		ps.println("<img src=\"images/elephant-parade-trier-182187_640.jpg\">");
+		//ps.println("<img src=\"images/elephant-parade-trier-182187_640.jpg\">");
+		//TODO: hack until we have Jetty dependency scoping fixed
+		ps.println("<img src=\"http://www.dcs.gla.ac.uk/~craigm/elephant-parade-trier-182187_640.jpg\">");
 		ps.println("</div>");
 		
 		this.printNav(ps);
 		ps.println("<pre>");
 		getPreformattedContent(req, resp, ps);
-		ps.println("</pre></body></html>");
+		ps.println("</pre></body>"
+				+ "<!-- " + getServletContext().getServerInfo() + "-->"
+				+ "</html>");
 		ps.close();
 		resp.flushBuffer();
 	}
