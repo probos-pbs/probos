@@ -28,7 +28,7 @@ import uk.ac.gla.terrier.probos.api.PBSJobStatusNodes;
 
 public class qstat extends Configured implements Tool {
 
-	static final boolean ADD_MASTER_URL = true;
+	static final boolean ADD_TRACKING_URL = true;
 	private PBSClient c;
 	private PrintStream out;
 	
@@ -94,9 +94,9 @@ public class qstat extends Configured implements Tool {
 		boolean err = false;
 		if (! full)
 		{
-			if (ADD_MASTER_URL)
+			if (ADD_TRACKING_URL)
 			{
-				out.println("Job id              Name             User            Time Use S Queue   Master URL");
+				out.println("Job id              Name             User            Time Use S Queue   Tracking URL");
 				out.println("------------------- ---------------- --------------- -------- - ------- ---------------------------------------------");
 			}
 			else
@@ -132,7 +132,7 @@ public class qstat extends Configured implements Tool {
 					+ Utils.padLeft(jStatus.getTimeUse(), 8) + ' '
 					+ state + ' ' 
 					+ Utils.padRight(jStatus.getQueue(), 7));
-				if (ADD_MASTER_URL)
+				if (ADD_TRACKING_URL)
 				{
 					out.print(' ' + jStatus.getTrackingURL());
 				}
