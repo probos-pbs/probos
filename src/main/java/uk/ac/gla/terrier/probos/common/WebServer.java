@@ -22,6 +22,8 @@ import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.gla.terrier.probos.Constants;
 
@@ -29,6 +31,9 @@ import uk.ac.gla.terrier.probos.Constants;
  * @author craigm
  */
 public class WebServer extends AbstractService {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(WebServer.class);
+	
 	
 	int port;
 	Server server;
@@ -54,12 +59,13 @@ public class WebServer extends AbstractService {
 		
 		ResourceHandler imageHandler = new ResourceHandler();
         imageHandler.setResourceBase(Constants.PROBOS_HOME + "/share/images/");
+		LOG.info("Images folder is " + imageHandler.getResourceBase());
         ContextHandler imageContext = new ContextHandler();
         imageContext.setContextPath("/images");
         imageContext.setHandler(imageHandler);
 		
 		ContextHandlerCollection contexts = new ContextHandlerCollection();
-        contexts.setHandlers(new Handler[]{imageContext,context0});
+        contexts.setHandlers(new Handler[]{context0,imageContext});
         
         HandlerCollection handlers = new HandlerCollection();
         handlers.setHandlers(new Handler[]{contexts, new DefaultHandler() });
@@ -96,6 +102,7 @@ public class WebServer extends AbstractService {
 					HttpServletResponse resp, PrintStream ps) throws ServletException,
 					IOException {
 				ps.println("This is a test response");
+				ps.println(getServletContext().getServerInfo());
 			}
 		}));
 		WebServer ws = new WebServer("TestWebserver", controllerServlets, 0);
