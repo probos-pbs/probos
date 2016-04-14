@@ -1,1 +1,128 @@
-probos
+#!/bin/bash
+
+PROBOS_UNSUPPORTED=(qalter qdisable qenable qhold qmgr qmove qmsg qorder qrerun qrun qsig qstart qstop qterm)
+
+# Reference 1: http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+# Reference 2: Cloudera's CDH hadoop script, with bug fix
+SOURCE="${BASH_SOURCE[0]}"
+BIN_DIR="$( dirname "$SOURCE" )"
+while [ -h "$SOURCE" ]
+do
+   SOURCE="$(readlink "$SOURCE")"
+   [[ $SOURCE != /* ]] && SOURCE="$BIN_DIR/$SOURCE"
+   BIN_DIR="$( cd -P "$( dirname "$SOURCE"  )" && pwd )"
+done
+BIN_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+JAR=probos-*.jar
+
+if [ "$PROBOS_CONF_DIR" == "" ];
+then
+	if [ -e "/etc/probos/" ];
+	then
+		PROBOS_CONF_DIR="/etc/probos/conf/"
+	else
+		PROBOS_CONF_DIR="$BIN_DIR/../conf"
+	fi
+fi
+	
+
+PROBOS_HOME="$BIN_DIR/../"
+PROBOS_LIB="$BIN_DIR/../lib/"
+
+if [ -e "$PROBOS_CONF_DIR/probos-env.sh" ];
+then
+ #echo "Found probos-env.sh"
+ . $PROBOS_CONF_DIR/probos-env.sh
+fi
+#echo "Use this java $JAVA_HOME"
+
+CMD=`basename $0`
+if [ "$CMD" == "pbs_server" ];
+then
+	PREFIX=uk.ac.gla.terrier.probos.controller
+	class=$PREFIX/ControllerServer
+	runner=yarn
+	export YARN_OPTS="$YARN_OPTS -Dcom.sun.management.jmxremote -Dprobos.home=$PROBOS_HOME -Dprobos.conf=$PROBOS_CONF_DIR -Dprobos.kitten.master.jar=`ls $PROBOS_LIB/kitten-master-0.*.*-jar-with-dependencies.jar`"
+	if [ -e "$PROBOS_CONF_DIR/log4j.properties" ];
+	then
+		export YARN_OPTS="$YARN_OPTS -Dlog4j.configuration=file:$PROBOS_CONF_DIR/log4j.properties "
+		# -Dlog4j.debug=true 
+	fi
+	#export YARN_OPTS="$YARN_OPTS -Dsun.security.krb5.debug=true -Xdebug -Xrunjdwp:transport=dt_socket,server=y,address=8765"
+	export YARN_ROOT_LOGGER=DEBUG,console
+elif [ "$CMD" == "pbs_appmaster" ];
+then
+	PREFIX=uk.ac.gla.terrier.probos.master
+	class=$PREFIX/ProbosApplicationMaster
+	runner=hadoop
+	export YARN_HEAPSIZE=512
+	export HADOOP_OPTS="$HADOOP_OPTS -Dcom.sun.management.jmxremote -Dprobos.home=$PROBOS_HOME -Dprobos.conf=$PROBOS_CONF_DIR -Dprobos.kitten.master.jar=`ls $PROBOS_LIB/kitten-master-0.*.*-jar-with-dependencies.jar`"
+	#export HADOOP_OPTS="$HADOOP_OPTS -Dsun.security.krb5.debug=true -Xdebug -Xrunjdwp:transport=dt_socket,server=y,address=8765"
+	#export HADOOP_ROOT_LOGGER=DEBUG,console
+	if [ "$HADOOP_CLIENT_CONF_DIR" != "" ]; then
+		HADOOP_CONF_DIR=$HADOOP_CLIENT_CONF_DIR
+	fi
+elif [ "$CMD" == "pbs_dibclient" ];
+then	
+	PREFIX=uk.ac.gla.terrier.probos.job.distributed
+        class=$PREFIX/ProbosDistributedJobSister
+	runner=hadoop
+	if [ "$HADOOP_CLIENT_CONF_DIR" != "" ]; then
+		HADOOP_CONF_DIR=$HADOOP_CLIENT_CONF_DIR
+	fi
+	#export HADOOP_OPTS="-Dsun.security.krb5.debug=true"
+	#export HADOOP_ROOT_LOGGER=DEBUG,console
+elif [ "$CMD" == "pbs_intclient" ];
+then
+	PREFIX=uk.ac.gla.terrier.probos.job.interactive
+	class=$PREFIX/ProbosInteractiveJob
+	runner=hadoop
+	if [ "$HADOOP_CLIENT_CONF_DIR" != "" ]; then
+		HADOOP_CONF_DIR=$HADOOP_CLIENT_CONF_DIR
+	fi
+	#export HADOOP_OPTS="-Dsun.security.krb5.debug=true"
+	#export HADOOP_ROOT_LOGGER=DEBUG,console
+elif [[ " ${PROBOS_UNSUPPORTED[@]} " =~ " ${CMD} " ]]; then
+	echo "PBS command $CMD not supported by ProBoS" >&2
+	exit 2
+elif [ "$CMD" == "pbsdsh" ];
+then
+	PREFIX=uk.ac.gla.terrier.probos.cli
+	class=$PREFIX/pbsdsh
+	runner=hadoop
+	if [ "$HADOOP_CLIENT_CONF_DIR" != "" ]; then
+		HADOOP_CONF_DIR=$HADOOP_CLIENT_CONF_DIR
+	fi
+	if [[ -n "$PBS_YARN_WORKDIR" ]];
+	then
+		class="$class -conf $PBS_YARN_WORKDIR/job.xml"
+	fi
+else
+	PREFIX=uk.ac.gla.terrier.probos.cli
+	class=$PREFIX/$CMD
+	runner=hadoop	
+	export HADOOP_OPTS="$HADOOP_OPTS -Dprobos.home=$PROBOS_HOME -Dprobos.conf=$PROBOS_CONF_DIR"
+	#export HADOOP_OPTS="-Dsun.security.krb5.debug=true"
+	#export HADOOP_ROOT_LOGGER=DEBUG,console
+	klist > /dev/null 2>&1 || (echo "No Kerberos credentials found (did you run kinit?)" >&2 ; exit 2)
+fi
+
+#check the runner is on the PATH
+if [ "`which $runner 2>/dev/null`" == "" ];
+then
+	runner=${HADOOP_HOME:$HADOOP_COMMON_HOME}/bin/$runner
+fi
+
+jar=`ls $BIN_DIR/../target/$JAR`
+if [ "$HADOOP_CLASSPATH" != "" ];
+then
+	export HADOOP_CLASSPATH=$PROBOS_CONF_DIR:$HADOOP_CLASSPATH:$jar
+else
+	export HADOOP_CLASSPATH=$PROBOS_CONF_DIR:$jar
+fi
+export HADOOP_CLASSPATH="$HADOOP_CLASSPATH:$PROBOS_LIB/*"
+export YARN_USER_CLASSPATH=$HADOOP_CLASSPATH
+export PROBOS_BIN_DIR=$BIN_DIR
+
+exec $runner $class $@
