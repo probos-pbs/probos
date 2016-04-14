@@ -28,7 +28,7 @@ import uk.ac.gla.terrier.probos.api.PBSJobStatusNodes;
 
 public class qstat extends Configured implements Tool {
 
-	static final boolean ADD_MASTER_URL = false;
+	static final boolean ADD_MASTER_URL = true;
 	private PBSClient c;
 	private PrintStream out;
 	
@@ -134,7 +134,7 @@ public class qstat extends Configured implements Tool {
 					+ Utils.padRight(jStatus.getQueue(), 7));
 				if (ADD_MASTER_URL)
 				{
-					out.print(jStatus.getTrackingURL());
+					out.print(' ' + jStatus.getTrackingURL());
 				}
 				out.println();
 				if (nodes)
