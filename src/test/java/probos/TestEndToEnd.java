@@ -38,12 +38,16 @@ import uk.ac.gla.terrier.probos.cli.qsub;
 import uk.ac.gla.terrier.probos.controller.ControllerServer;
 import uk.ac.gla.terrier.probos.controller.KittenUtils2;
 
+/** WARNING: I find that these unit tests do not run when connected to a vpn */
 public class TestEndToEnd {
 
 	MiniYARNCluster miniCluster;
 	ControllerServer cs;
+	File probosJobDir = null;
+	
 	@Before public void setupCluster() throws Exception {
 		System.setProperty("probos.home", System.getProperty("user.dir"));
+		(probosJobDir = new File(System.getProperty("user.dir"),"probos")).mkdir();
 		String name = "mycluster";
 		int noOfNodeManagers = 1;
 		int numLocalDirs = 1;
@@ -72,8 +76,11 @@ public class TestEndToEnd {
 		
 		
 		System.err.println("Entering teardown");
-		cs.stopAndWait();
+		if (cs != null)
+			cs.stopAndWait();
 		miniCluster.close();
+		if (probosJobDir != null)
+			probosJobDir.delete();
 	}
 	
 	protected void testJobsConcurrent(int n) throws Exception 
