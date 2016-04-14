@@ -8,6 +8,9 @@ public class Constants {
 	public static final String PRODUCT_VERSION = Version.VERSION;
 	public static final String DIRECTIVE_PREFIX = "#PBS";
 	public static final int DEFAULT_CONTROLLER_PORT = 8027;
+	public static final int CONTROLLER_MASTER_PORT_OFFSET = 1; //8028
+	public static final int CONTROLLER_INTERACTIVE_PORT_OFFSET = -1; //8026
+	public static final int CONTROLLER_HTTP_PORT_OFFSET = 2; //8029
 		
 	
 	public static final String HADOOP_HOME = System.getenv("HADOOP_HOME"); 

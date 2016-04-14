@@ -24,7 +24,8 @@ public class InteractiveKittenUtil extends KittenUtils2 {
 	protected void renderJob(Path targetScript, PrintWriter w)
 			throws IOException
 	{
-		String controllerIntRPCAddress = Utils.getHostname() + ":"+ String.valueOf(-1+pConf.getInt(PConfiguration.KEY_CONTROLLER_PORT, 8027));
+		String controllerIntRPCAddress = Utils.getHostname() + ":"+ 
+			String.valueOf(Constants.CONTROLLER_INTERACTIVE_PORT_OFFSET+pConf.getInt(PConfiguration.KEY_CONTROLLER_PORT, 8027));
 		w.println(" container = {");
 		w.println("  instances = 1,");
 		String interactiveCmd = Constants.PROBOS_HOME + "/bin/pbs_intclient -conf job.xml 1>> <LOG_DIR>/stdout 2>> <LOG_DIR>/stderr";

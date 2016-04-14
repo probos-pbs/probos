@@ -97,7 +97,8 @@ public class DistributedKittenUtils extends KittenUtils2 {
 
 	protected void renderSisterSuperiorContainer(PrintWriter w, Path targetScript, NodeRequest nr) throws IOException
 	{
-		String controllerIntRPCAddress = Utils.getHostname() + ":"+ String.valueOf(3+pConf.getInt(PConfiguration.KEY_CONTROLLER_PORT, 8027));
+		String controllerIntRPCAddress = Utils.getHostname() + ":"+ String.valueOf(
+				Constants.CONTROLLER_MASTER_PORT_OFFSET+pConf.getInt(PConfiguration.KEY_CONTROLLER_PORT, 8027));
 		w.println(" {");
 		
 		final Map<String,String> extraEnv = new HashMap<String,String>();

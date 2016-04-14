@@ -290,24 +290,26 @@ public class ControllerServer extends AbstractService implements PBSClient {
 		secretManager = new ControllerAPISecretManager(
 				//delegationKeyUpdateInterval
 				//renewal interval for delegation token
-				24 * 3600 *1000, //Yarn default is 1 day
+				7 * 24 * 3600 *1000, //Yarn default is 7 day
 				
 				//delegationTokenMaxLifetime -- maximum lifetime for which a delegation token is valid
 				//i.e. how long can we keep renewing the token for?
-				7 * 24 * 3600 *1000, //Yarn default is 7 days
+				14 * 24 * 3600 *1000, //Yarn default is 14 days
 				
 				//delegationTokenRenewInterval -- how long should a token last?
-				24 * 3600 *1000, //Yarn default is 1 day
+				7 * 24 * 3600 *1000, //Yarn default is 7 day
 				
 				//delegationTokenRemoverScanInterval -- how often are expired keys removed?
 				3600 *1000); //Yarn default is 1 hour
 		
 		//build the client rpc server: 8027
+		int port = pConf.getInt(PConfiguration.KEY_CONTROLLER_PORT, 8027);
+		LOG.info("Starting RPC server for "+ PBSClient.class.getSimpleName() + " on port " + port);
 		clientRpcserver = new RPC.Builder(yConf).
                 setInstance(this).
                 setBindAddress(bindAddress).
                 setProtocol(PBSClient.class).
-                setPort(pConf.getInt(PConfiguration.KEY_CONTROLLER_PORT, 8027)).
+                setPort(port).
                 setSecretManager(secretManager).
                //setVerbose(true).
                 build();
@@ -316,23 +318,27 @@ public class ControllerServer extends AbstractService implements PBSClient {
 			
 		
 		//build the master rpc server: 8028
+		port = Constants.CONTROLLER_MASTER_PORT_OFFSET+ pConf.getInt(PConfiguration.KEY_CONTROLLER_PORT, 8027);
+		LOG.info("Starting RPC server for "+ PBSMasterClient.class.getSimpleName() + " on port " + port);
 		masterRpcserver = new RPC.Builder(yConf).
                 setInstance(new ApplicationMasterAPI()).
                 setBindAddress(bindAddress).
                 setProtocol(PBSMasterClient.class).
-                setPort(1+ pConf.getInt(PConfiguration.KEY_CONTROLLER_PORT, 8027)).
+                setPort(port).
                 setSecretManager(secretManager).
                //setVerbose(true).
                 build();
 		masterRpcserver.refreshServiceAclWithLoadedConfiguration(yConf, new ControllerPolicyProvider());
 		
 		
+		port = Constants.CONTROLLER_INTERACTIVE_PORT_OFFSET+ pConf.getInt(PConfiguration.KEY_CONTROLLER_PORT, 8027);
+		LOG.info("Starting RPC server for "+ PBSInteractiveClient.class.getSimpleName() + " on port " + port);
 		//build the interactive rpc server: 8026
 		interactiveRpcserver = new RPC.Builder(yConf).
             setInstance(new InteractiveTaskAPI()).
             setBindAddress(bindAddress).
             setProtocol(PBSInteractiveClient.class).
-            setPort(-1+ pConf.getInt(PConfiguration.KEY_CONTROLLER_PORT, 8027)).
+            setPort(port).
             setSecretManager(secretManager).
             //setVerbose(true).
             build();
@@ -343,7 +349,8 @@ public class ControllerServer extends AbstractService implements PBSClient {
 		final List<Entry<String,BaseServlet>> controllerServlets = new ArrayList<Entry<String,BaseServlet>>();
 		controllerServlets.add(new MapEntry<String,BaseServlet>("/", new QstatServlet("/", controllerServlets, this)));
 		controllerServlets.add(new MapEntry<String,BaseServlet>("/pbsnodes", new PbsnodesServlet("/", controllerServlets, this)));
-		final int httpport = pConf.getInt(PConfiguration.KEY_CONTROLLER_HTTP_PORT, Constants.DEFAULT_CONTROLLER_PORT+2);		
+		final int httpport = pConf.getInt(PConfiguration.KEY_CONTROLLER_HTTP_PORT, Constants.DEFAULT_CONTROLLER_PORT+Constants.CONTROLLER_HTTP_PORT_OFFSET);		
+		LOG.info("Starting Jetty ProbosControllerHttp on port " + httpport);
 		webServer = new WebServer("ProbosControllerHttp", controllerServlets, httpport);
 		webServer.init(pConf);
 				
