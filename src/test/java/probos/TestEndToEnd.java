@@ -371,6 +371,8 @@ public class TestEndToEnd {
 			String stdErr = j.getError_Path() + String.valueOf(1) + "-" + ar_id;
 			assertExists(stdOut);
 			assertExists(stdErr);
+			new File(stdOut).delete();
+			new File(stdErr).delete();
 		}
 	}
 }
