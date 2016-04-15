@@ -12,7 +12,7 @@ Clone the probos-csd directory. Use Maven (`mvn package`) to build the CSD jar f
 
 Roughly:
 
-    sudo cp distribution/target/BLUR-0.2.4.jar /opt/cloudera/csd/BLUR-0.2.4.jar
+    sudo cp probos-csd/target/PROBOS-0.2.4.jar /opt/cloudera/csd/PROBOS-0.2.4.jar
     sudo service cloudera-scm-server restart
 
 

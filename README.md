@@ -5,7 +5,7 @@ ProBoS is an implementation of the Portable Batch System (PBS), including the st
 
 # Features
 
-ProBoS supports the basic functionality of a PBS implementation, as traditionally implemented by <a href="http://www.adaptivecomputing.com/products/open-source/torque/">Torque</a>, OpenPBS, or <a href="http://gridscheduler.sourceforge.net">Oracle Grid Engine</a>. These platforms implement a POSIX standard, and ProBoS aims to replicate the core POSIX standard functionality. During implementation, our reference was Torque, so this is the platform that ProBoS has the most similarities to. The table below summarises the main features of ProBoS, in contrast to Torque.
+ProBoS supports the basic functionality of a PBS implementation, as traditionally implemented by  [Torq] <a href="http://www.adaptivecomputing.com/products/open-source/torque/">Torque</a>, OpenPBS, or <a href="http://gridscheduler.sourceforge.net">Oracle Grid Engine</a>. These platforms implement a POSIX standard, and ProBoS aims to replicate the core POSIX standard functionality. During implementation, our reference was Torque, so this is the platform that ProBoS has the most similarities to. The table below summarises the main features of ProBoS, in contrast to Torque.
 
 | _Feature_ | _Torque PBS_ | _ProBoS_ |
 |---------|------------|------|
@@ -19,7 +19,7 @@ ProBoS supports the basic functionality of a PBS implementation, as traditionall
 
 # Requirements
 
-You must have a working Hadoop YARN installation, including Kerberos authentication. We used CDH 5. It is _essential_ that you verify that your Hadoop YARN installation is working with Kerberos BEFORE you setup ProBoS.
+You must have a working Hadoop YARN installation, including Kerberos authentication. We used CDH 5. It is _essential_ that you verify that your Hadoop YARN installation is working, with Kerberos, BEFORE you setup ProBoS.
 
 # Installation
 
@@ -43,7 +43,7 @@ Firstly, you need to ensure that each user account on the cluster can ssh from n
 
 Once this works, 
 
-	#Add /path/to/hbps/bin to the user's PATH
+	#Add /path/to/probos/bin to the user's PATH
 	#for bash:
 	export PATH=$PATH:/path/to/probos/bin
 
@@ -51,8 +51,8 @@ Once this works,
 
 You cannot submit jobs as the yarn user. Switch to a client user. You must perform Kerberos initialisation for your client user. You will be prompted for your password.
 
-	kinit -r 7d
-	#or perhaps kinit -r 7d $USER@ACTIVEDIRECTORY.DOMAIN
+	kinit
+	#or perhaps kinit $USER@ACTIVEDIRECTORY.DOMAIN
 
 To view ProBoS jobs currently queued from a client:
 
