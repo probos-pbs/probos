@@ -9,6 +9,8 @@ Early versions of Hadoop supported Hadoop-on-Demand (https://hadoop.apache.org/d
 
 Apart from being outdated, the problem with both the HOD and MyHadoop initiatives is that they take existing clusters and add Hadoop-on-top. This ends up dedicating resources to single Hadoop jobs, instead of sharing them across jobs. When a job does not use all resources allocated (e.g. when a MapReduce job is ending) this is particularly wasteful of resources.
 
+By-and-large, the problems of Hadoop-on-Demand and similar are well document (e.g. http://www.informit.com/articles/article.aspx?p=2190193&seqNum=4)
+
 Why ProBoS?
 
 ProBoS offers an alternative architecture, by offering PBS functionality upon a Hadoop YARN cluster. This means that PBS, MapReduce, Spark etc., jobs can co-exist on the same cluster. Users familiar with PBS commands such as qsub, qstat can continue to run their jobs in the classical way. 
