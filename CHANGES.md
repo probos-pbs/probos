@@ -2,12 +2,16 @@
 
 v0.2.11 - April 2015
  * Added tracking URL to qstat output
- * Clarified logging in Controller viz RPC port numbers
+ * Clarified logging in Controller wrt RPC port numbers
+ * Added background image to servlets
+ * Added log access to job master HTTP UI
+ * Maven fixes to prevent slf4j binding warnings
+ * Increased timeouts for token renewal (in case a job doesn't start within 24 hours) 
 
 v0.2.10 - March 2015
  * Mavenize more, including version numbering
  * Fix sendmail
- * Fix unit tests and controller viz. absolute file paths
+ * Fix unit tests and controller wrt absolute file paths
  * Use SLF4j and log4j, to permit CSD to configure logging
  * Fix token renewal
 

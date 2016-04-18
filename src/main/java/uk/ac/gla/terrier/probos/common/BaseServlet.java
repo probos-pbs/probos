@@ -31,6 +31,14 @@ public abstract class BaseServlet extends HttpServlet {
 	abstract protected void getPreformattedContent(HttpServletRequest req, HttpServletResponse resp, PrintStream ps)
 			throws ServletException, IOException;
 	
+	protected void getContent(HttpServletRequest req, HttpServletResponse resp, PrintStream ps)
+			throws ServletException, IOException
+	{
+		ps.println("<pre>");
+		getPreformattedContent(req, resp, ps);
+		ps.println("</pre>");
+	}
+
 	protected void printNav(PrintStream ps) throws IOException {
 		for (Entry<String,BaseServlet> servlet : servletNameSpace)
 		{
@@ -72,14 +80,14 @@ public abstract class BaseServlet extends HttpServlet {
 		ps.println("<body>");
 		ps.println("<div class=\"watermark\">");
 		//ps.println("<img src=\"images/elephant-parade-trier-182187_640.jpg\">");
-		//TODO: hack until we have Jetty dependency scoping fixed
+		//TODO: hack until we have Jetty dependency scoping fixed for Cloudera
 		ps.println("<img src=\"http://www.dcs.gla.ac.uk/~craigm/elephant-parade-trier-182187_640.jpg\">");
 		ps.println("</div>");
 		
 		this.printNav(ps);
-		ps.println("<pre>");
-		getPreformattedContent(req, resp, ps);
-		ps.println("</pre></body>"
+		getContent(req, resp, ps);
+		
+		ps.println("</body>"
 				+ "<!-- " + getServletContext().getServerInfo() + "-->"
 				+ "</html>");
 		ps.close();

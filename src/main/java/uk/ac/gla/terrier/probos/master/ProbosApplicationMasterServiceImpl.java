@@ -1,5 +1,7 @@
 package uk.ac.gla.terrier.probos.master;
 
+import gnu.trove.map.hash.TIntObjectHashMap;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -35,6 +37,7 @@ import uk.ac.gla.terrier.probos.common.MapEntry;
 import uk.ac.gla.terrier.probos.common.WebServer;
 import uk.ac.gla.terrier.probos.master.webapp.ConfServlet;
 import uk.ac.gla.terrier.probos.master.webapp.JobProgressServlet;
+import uk.ac.gla.terrier.probos.master.webapp.LogsServlet;
 import uk.ac.gla.terrier.probos.master.webapp.QstatJobServlet;
 
 import com.cloudera.kitten.ContainerLaunchParameters;
@@ -57,7 +60,7 @@ public class ProbosApplicationMasterServiceImpl extends ApplicationMasterService
 	final List<Token<ProbosDelegationTokenIdentifier>> probosTokens;
 	final ProbosTokenRenewer renewer;
 	long lastHeartbeat = 0;
-	
+	final TIntObjectHashMap<ContainerId> arrayId2ContainerId = new TIntObjectHashMap<ContainerId>();
 	
 	@SuppressWarnings("unchecked")
 	public ProbosApplicationMasterServiceImpl(
@@ -112,6 +115,8 @@ public class ProbosApplicationMasterServiceImpl extends ApplicationMasterService
 		masterServlets.add(new MapEntry<String,BaseServlet>("/", new JobProgressServlet("./", masterServlets, controllerClient, this)));
 		masterServlets.add(new MapEntry<String,BaseServlet>("/qstatjob", new QstatJobServlet("./qstatjob", masterServlets, controllerClient, this)));	
 		masterServlets.add(new MapEntry<String,BaseServlet>("/conf", new ConfServlet("./conf", masterServlets, controllerClient, this)));
+		masterServlets.add(new MapEntry<String,BaseServlet>("/logs", new LogsServlet("./logs", masterServlets, controllerClient, this)));
+		
 		//0 means any random free port
 		webServer = new WebServer("ProbosControllerHttp", masterServlets, 0);
 		webServer.init(_conf);
@@ -157,6 +162,16 @@ public class ProbosApplicationMasterServiceImpl extends ApplicationMasterService
 	public int getJobId()
 	{
 		return jobId;
+	}
+	
+	public boolean isArray()
+	{
+		return arrayId2ContainerId.size() > 0;
+	}
+	
+	public TIntObjectHashMap<ContainerId> getArrayIds()
+	{
+		return arrayId2ContainerId;
 	}
 	
 	protected ContainerTracker getTracker(ContainerLaunchParameters clp) {
@@ -208,6 +223,7 @@ public class ProbosApplicationMasterServiceImpl extends ApplicationMasterService
 				Map<String, ByteBuffer> allServiceResponse) {
 			super.onContainerStarted(containerId, allServiceResponse);
 			masterClient.jobArrayTaskEvent(jobId, arrayId, EventType.START, containerId.toString(), null);
+			arrayId2ContainerId.put(arrayId, containerId);
 		}
 
 		@Override
