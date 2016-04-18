@@ -33,8 +33,8 @@ public class JobProgressServlet extends BaseServlet {
 			HttpServletResponse resp, PrintStream ps) throws ServletException,
 			IOException {
 		
-		ps.println("Job id:" + pams.getJobId());
-		ps.println("Progress:" + pams.getProgress());
+		ps.println("Job id: " + pams.getJobId());
+		ps.println("Progress: " + pams.getProgress());
 		ps.println("Has running containers: "+ pams.hasRunningContainers());
 		ps.println("Requested: " + pams.getTotalRequested());
 		//ps.println("Started: " + pams.g
