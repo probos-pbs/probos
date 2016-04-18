@@ -66,7 +66,7 @@ public interface PBSClient extends VersionedProtocol {
 	
 	/** Returns the contents of the stdout/stderr for the task of the given jobId. 
 	 * @param jobId specifies the job we want output of
-	 * @param arrayId examined if the job is an array
+	 * @param arrayId examined if the job is an array (ignored for non-array jobs)
 	 * @param stdout true for stdout, false for stderr
 	 * @param start offset to start reading the log 
 	 * @param URLonly dont return the content, only return the URL
