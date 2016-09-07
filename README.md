@@ -17,31 +17,25 @@ ProBoS supports the basic functionality of a PBS implementation, as traditionall
 | Scheduling control | Yes | (w/ YARN) |
 | Kerberos integration | (w/ OS) | Yes |
 
+You can follow what's new in the latest release of ProBoS from [CHANGES.md](CHANGES.md).
+
 # Requirements
 
 You must have a working Hadoop YARN installation, including Kerberos authentication. We used CDH 5. It is _essential_ that you verify that your Hadoop YARN installation is working, with Kerberos, BEFORE you setup ProBoS.
 
 # Installation
 
-## Compiling
+Installation of the ProBoS server can be in one of two manners:
 
-	git clone URL
-	cd probos 
-	mvn package
+ 1. If you use Clouera Manager, you can install a CSD to automate the installation of ProBoS. This is strongly recommended. See [cloudera.md](cloudera.md) for more details.
 
-## Server installation
-
-	#alter conf/probos-site.xml as appropriate
-	#alter conf/probos-env.sh to point to a JVM with the appropriate Keberos support
-	#su to the yarn user
-	#pbs_server must also have access to the yarn Kerberos keytab file
-	bin/pbs_server
+ 2. You can compile and install ProBoS yourself. See [manual_install.md](manual_install.md) for more details.
 
 
 ## Client installation
 Firstly, you need to ensure that each user account on the cluster can ssh from nodes back to the client machine you are on without a password. There are many Internet guides on `ssh-keygen`. Moreover, each client machine and client user needs a working Kerberos installation. As above, if your Hadoop installation doesn't have working Kerberos, then you will not success.  
 
-Once this works, 
+If you are not using the Cloudera installation method, you may have to add ProBos onto your path:
 
 	#Add /path/to/probos/bin to the user's PATH
 	#for bash:
@@ -49,7 +43,7 @@ Once this works,
 
 # Testing your installation
 
-You cannot submit jobs as the yarn user. Switch to a client user. You must perform Kerberos initialisation for your client user. You will be prompted for your password.
+You cannot submit jobs as the `yarn` user. Switch to a client user. You must perform Kerberos initialisation for your client user. You will be prompted for your password.
 
 	kinit
 	#or perhaps kinit $USER@ACTIVEDIRECTORY.DOMAIN
@@ -57,7 +51,7 @@ You cannot submit jobs as the yarn user. Switch to a client user. You must perfo
 To view ProBoS jobs currently queued from a client:
 
 	qstat
-	
+
 To submit a job:
 
 	echo hostname > testJob.sh
@@ -65,7 +59,7 @@ To submit a job:
 	qstat
 	#wait for a period
 	ls testJob.sh.o* testJob.sh.e*
-	
+
 To delete job with id 1:
 
 	qdel 1
