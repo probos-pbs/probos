@@ -5,7 +5,7 @@ ProBoS is an implementation of the Portable Batch System (PBS), including the st
 
 # Features
 
-ProBoS supports the basic functionality of a PBS implementation, as traditionally implemented by  [Torq] <a href="http://www.adaptivecomputing.com/products/open-source/torque/">Torque</a>, OpenPBS, or <a href="http://gridscheduler.sourceforge.net">Oracle Grid Engine</a>. These platforms implement a POSIX standard, and ProBoS aims to replicate the core POSIX standard functionality. During implementation, our reference was Torque, so this is the platform that ProBoS has the most similarities to. The table below summarises the main features of ProBoS, in contrast to Torque.
+ProBoS supports the basic functionality of a PBS implementation, as traditionally implemented by [Torque](http://www.adaptivecomputing.com/products/open-source/torque/), OpenPBS, or [Oracle Grid Engine](http://gridscheduler.sourceforge.net). These platforms implement a POSIX standard, and ProBoS aims to replicate the core POSIX standard functionality. During implementation, our reference was Torque, so this is the platform that ProBoS has the most similarities to. The table below summarises the main features of ProBoS, in contrast to Torque.
 
 | _Feature_ | _Torque PBS_ | _ProBoS_ |
 |---------|------------|------|
