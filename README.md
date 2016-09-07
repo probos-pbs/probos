@@ -69,3 +69,7 @@ To submit a job:
 To delete job with id 1:
 
 	qdel 1
+
+# Small Print
+
+ProBoS is similar in function to Portable Batch System (PBS), as implemented by TORQUE from Adaptive Computing, or OpenPBS and PBSPro. ProBoS is neither endorsed by nor affiliated with Altair Grid Solutions or Adaptive Computing. PBSPro, the commercial release of PBS, can be purchased through Altair.
