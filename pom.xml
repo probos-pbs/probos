@@ -26,12 +26,6 @@
 			<url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
 		</repository>
 
-		<repository>
-			<id>in-project</id>
-			<name>In Project Repo</name>
-			<url>file:///Users/craigm/Documents/2015/kitten/java/common/target</url>
-		</repository>
-
 	</repositories>
 
 	<dependencies>
@@ -146,24 +140,18 @@
 			<groupId>com.cloudera.kitten</groupId>
 			<artifactId>kitten-client</artifactId>
 			<version>0.3.0</version>
-			<scope>system</scope>
-			<systemPath>/Users/craigm/Documents/workspace/kitten/java/client/target/kitten-client-0.3.0.jar</systemPath>
 		</dependency>
 
 		<dependency>
 			<groupId>com.cloudera.kitten</groupId>
 			<artifactId>kitten-master</artifactId>
 			<version>0.3.0</version>
-			<scope>system</scope>
-			<systemPath>/Users/craigm/Documents/workspace/kitten/java/master/target/kitten-master-0.3.0-jar-with-dependencies.jar</systemPath>
 		</dependency>
 
 		<dependency>
 			<groupId>com.cloudera.kitten</groupId>
 			<artifactId>kitten-common</artifactId>
 			<version>0.3.0</version>
-			<scope>system</scope>
-			<systemPath>/Users/craigm/Documents/workspace/kitten/java/common/target/kitten-common-0.3.0.jar</systemPath>
 		</dependency>
 
 		<dependency>
