@@ -1,7 +1,7 @@
 
 # About
 
-ProBoS is an implementation of the Portable Batch System (PBS), including the standard `qsub` and `qstat` commands, built upon Hadoop YARN. It aims to bring closer the traditional HPC communities onto Hadoop-infrastructure, allowing the sharing of cluster resources while maintaining familiar tools for legacy HPC users.
+(ProBoS)[https://probos-pbs.github.io] is an implementation of the Portable Batch System (PBS), including the standard `qsub` and `qstat` commands, built upon Hadoop YARN. It aims to bring closer the traditional HPC communities onto Hadoop-infrastructure, allowing the sharing of cluster resources while maintaining familiar tools for legacy HPC users.
 
 # Features
 
