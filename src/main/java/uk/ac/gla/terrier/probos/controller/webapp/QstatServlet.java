@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -34,7 +35,7 @@ public class QstatServlet extends BaseServlet {
 	private static final long serialVersionUID = 1L;
 	static final String NAME = "qstat";
 	
-	public QstatServlet(String uri, List<Entry<String,BaseServlet>> _servletNameSpace, PBSClient _pbsClient) {
+	public QstatServlet(String uri, List<Entry<String,HttpServlet>> _servletNameSpace, PBSClient _pbsClient) {
 		super(NAME, uri, _servletNameSpace, _pbsClient);
 	}
 	

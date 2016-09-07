@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.servlet.http.HttpServlet;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.ipc.RPC;
@@ -47,11 +49,11 @@ import uk.ac.gla.terrier.probos.api.PBSClient;
 import uk.ac.gla.terrier.probos.api.PBSMasterClient;
 import uk.ac.gla.terrier.probos.api.PBSMasterClient.EventType;
 import uk.ac.gla.terrier.probos.api.ProbosDelegationTokenIdentifier;
-import uk.ac.gla.terrier.probos.common.BaseServlet;
 import uk.ac.gla.terrier.probos.common.MapEntry;
 import uk.ac.gla.terrier.probos.common.WebServer;
 import uk.ac.gla.terrier.probos.master.webapp.ConfServlet;
 import uk.ac.gla.terrier.probos.master.webapp.JobProgressServlet;
+import uk.ac.gla.terrier.probos.master.webapp.KittenConfServlet;
 import uk.ac.gla.terrier.probos.master.webapp.LogsServlet;
 import uk.ac.gla.terrier.probos.master.webapp.QstatJobServlet;
 
@@ -126,11 +128,12 @@ public class ProbosApplicationMasterServiceImpl extends ApplicationMasterService
 		container = System.getenv("CONTAINER_ID");
 		masterClient.jobEvent(jobId, EventType.MASTER_START, container, null);		
 		
-		final List<Entry<String,BaseServlet>> masterServlets = new ArrayList<Entry<String,BaseServlet>>();
-		masterServlets.add(new MapEntry<String,BaseServlet>("/", new JobProgressServlet("./", masterServlets, controllerClient, this)));
-		masterServlets.add(new MapEntry<String,BaseServlet>("/qstatjob", new QstatJobServlet("./qstatjob", masterServlets, controllerClient, this)));	
-		masterServlets.add(new MapEntry<String,BaseServlet>("/conf", new ConfServlet("./conf", masterServlets, controllerClient, this)));
-		masterServlets.add(new MapEntry<String,BaseServlet>("/logs", new LogsServlet("./logs", masterServlets, controllerClient, this)));
+		final List<Entry<String,HttpServlet>> masterServlets = new ArrayList<>();
+		masterServlets.add(new MapEntry<String,HttpServlet>("/", new JobProgressServlet("./", masterServlets, controllerClient, this)));
+		masterServlets.add(new MapEntry<String,HttpServlet>("/qstatjob", new QstatJobServlet("./qstatjob", masterServlets, controllerClient, this)));	
+		masterServlets.add(new MapEntry<String,HttpServlet>("/conf", new ConfServlet("./conf", masterServlets, controllerClient, this)));
+		masterServlets.add(new MapEntry<String,HttpServlet>("/kittenconf", new KittenConfServlet("./kittenconf", masterServlets, controllerClient, this)));
+		masterServlets.add(new MapEntry<String,HttpServlet>("/logs", new LogsServlet("./logs", masterServlets, controllerClient, this)));
 		
 		//0 means any random free port
 		webServer = new WebServer("ProbosControllerHttp", masterServlets, 0);

@@ -33,9 +33,9 @@ public abstract class BaseServlet extends HttpServlet {
 	protected final PBSClient c;
 	String name;
 	String uri;
-	List<Entry<String,BaseServlet>> servletNameSpace;
+	List<Entry<String,HttpServlet>> servletNameSpace;
 	
-	public BaseServlet(String _name, String _uri, List<Entry<String,BaseServlet>> _servletNameSpace, PBSClient _pbsClient)
+	public BaseServlet(String _name, String _uri, List<Entry<String,HttpServlet>> _servletNameSpace, PBSClient _pbsClient)
 	{
 		name = _name;
 		uri = _uri;
@@ -55,8 +55,11 @@ public abstract class BaseServlet extends HttpServlet {
 	}
 
 	protected void printNav(PrintStream ps) throws IOException {
-		for (Entry<String,BaseServlet> servlet : servletNameSpace)
+		for (Entry<String,HttpServlet> servlet : servletNameSpace)
 		{
+			if (! (servlet.getValue() instanceof BaseServlet))
+				continue;
+			
 			if (this.equals(servlet.getValue()))
 			{
 				ps.println(name);
@@ -68,7 +71,7 @@ public abstract class BaseServlet extends HttpServlet {
 				ps.println("<a href='"
 						+ name
 						+"'>"
-						+servlet.getValue().name + "</a>");
+						+((BaseServlet)servlet.getValue()).name + "</a>");
 			}
 			ps.println("&nbsp;&nbsp;&nbsp;&nbsp;");
 		}
@@ -91,6 +94,11 @@ public abstract class BaseServlet extends HttpServlet {
 		ps.println(" left:0; right:0; width:640px; height:640px;");
 		
 		ps.println("} </style>");
+		
+		ps.println("<link rel=\"stylesheet\" href=\"//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/styles/default.min.css\">");
+		ps.println("<script src=\"//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/highlight.min.js\"></script>");
+		ps.println("<script>hljs.initHighlightingOnLoad();</script>");
+		
 		ps.println("</head>");
 		ps.println("<body>");
 		ps.println("<div class=\"watermark\">");

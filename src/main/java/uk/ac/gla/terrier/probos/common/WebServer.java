@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -52,9 +53,9 @@ public class WebServer extends AbstractService {
 	
 	int port;
 	Server server;
-	List<Entry<String, BaseServlet>> servlets;
+	List<Entry<String, HttpServlet>> servlets;
 	
-	public WebServer(String name, List<Entry<String, BaseServlet>> controllerServlets, int _port)
+	public WebServer(String name, List<Entry<String, HttpServlet>> controllerServlets, int _port)
 	{
 		super(name);
 		servlets = controllerServlets;
@@ -68,7 +69,7 @@ public class WebServer extends AbstractService {
 		
 		ServletContextHandler context0 = new ServletContextHandler(ServletContextHandler.SESSIONS);
 		context0.setContextPath("/");
-		for (Entry<String,BaseServlet> s : servlets) {
+		for (Entry<String,HttpServlet> s : servlets) {
 			context0.addServlet(new ServletHolder(s.getValue()), s.getKey());
 		}
 		
@@ -108,8 +109,8 @@ public class WebServer extends AbstractService {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		final List<Entry<String,BaseServlet>> controllerServlets = new ArrayList<Entry<String,BaseServlet>>();
-		controllerServlets.add(new MapEntry<String,BaseServlet>("/", new BaseServlet("name", "/", controllerServlets, null) {
+		final List<Entry<String,HttpServlet>> controllerServlets = new ArrayList<>();
+		controllerServlets.add(new MapEntry<String,HttpServlet>("/", new BaseServlet("name", "/", controllerServlets, null) {
 			private static final long serialVersionUID = 1L;
 
 			@Override

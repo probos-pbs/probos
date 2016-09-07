@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -37,7 +38,7 @@ public class QstatJobServlet extends BaseServlet {
 	
 	ProbosApplicationMasterServiceImpl pams;
 	
-	public QstatJobServlet(String _uri,List<Entry<String,BaseServlet>> _servletNameSpace, PBSClient _pbsClient,
+	public QstatJobServlet(String _uri,List<Entry<String,HttpServlet>> _servletNameSpace, PBSClient _pbsClient,
 			ProbosApplicationMasterServiceImpl _pams)
 			throws Exception {
 		super(NAME, _uri, _servletNameSpace, _pbsClient);

@@ -40,6 +40,8 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
+import javax.servlet.http.HttpServlet;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -49,6 +51,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.ipc.ProtocolSignature;
 import org.apache.hadoop.ipc.RPC;
 import org.apache.hadoop.ipc.Server;
+import org.apache.hadoop.jmx.JMXJsonServlet;
 import org.apache.hadoop.net.NetUtils;
 import org.apache.hadoop.security.Credentials;
 import org.apache.hadoop.security.SecurityUtil;
@@ -87,7 +90,6 @@ import uk.ac.gla.terrier.probos.api.PBSJobStatusNodes;
 import uk.ac.gla.terrier.probos.api.PBSMasterClient;
 import uk.ac.gla.terrier.probos.api.PBSNodeStatus;
 import uk.ac.gla.terrier.probos.api.ProbosDelegationTokenIdentifier;
-import uk.ac.gla.terrier.probos.common.BaseServlet;
 import uk.ac.gla.terrier.probos.common.MapEntry;
 import uk.ac.gla.terrier.probos.common.WebServer;
 import uk.ac.gla.terrier.probos.controller.webapp.PbsnodesServlet;
@@ -99,6 +101,11 @@ import com.cloudera.kitten.client.params.lua.LuaYarnClientParameters;
 import com.cloudera.kitten.client.service.YarnClientFactory;
 import com.cloudera.kitten.client.service.YarnClientServiceImpl;
 import com.cloudera.kitten.util.LocalDataHelper;
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.JmxReporter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.servlets.MetricsServlet;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -218,6 +225,8 @@ public class ControllerServer extends AbstractService implements PBSClient {
 	
 	TIntObjectHashMap<JobHold> jobHolds = new TIntObjectHashMap<JobHold>();
 	
+	final MetricRegistry metrics = new MetricRegistry();
+	JmxReporter jmxMetricReporter;
 	Configuration yConf;
 	Configuration pConf;
 	Thread watcherThread;
@@ -229,6 +238,12 @@ public class ControllerServer extends AbstractService implements PBSClient {
 	YarnClient yClient;
 	MailClient mClient;
 	final Path probosFolder;
+	
+	Counter runningJobs;
+	Counter mailEvents;
+	Counter mailFailures;
+	Counter killedJobs;
+	Counter rejectedJobs;
 	
 	protected void mailEvent(int jobid, PBSJob job, MailEvent event, String additionalContent)
 	{
@@ -253,15 +268,20 @@ public class ControllerServer extends AbstractService implements PBSClient {
 		default:
 			break;		
 		}
+		
 		List<String> msg = new ArrayList<String>();
 		msg.add(subject);
 		if (additionalContent != null)
 			msg.add(additionalContent);
 		for (String username : dest.split(","))
 		{
+			mailEvents.inc();
 			boolean status = mClient.sendEmail(username, subject, msg.toArray(new String[msg.size()]));
 			if (! status)
+			{
 				LOG.warn("Failed to send email to "+ username + " about job " + jobid + " event of " + event.toString());
+				mailFailures.inc();
+			}
 		}
 	 }
 	
@@ -360,10 +380,14 @@ public class ControllerServer extends AbstractService implements PBSClient {
 		interactiveRpcserver.refreshServiceAclWithLoadedConfiguration(yConf, new ControllerPolicyProvider());
 
 		
-		//build and start the webapp UI server
-		final List<Entry<String,BaseServlet>> controllerServlets = new ArrayList<Entry<String,BaseServlet>>();
-		controllerServlets.add(new MapEntry<String,BaseServlet>("/", new QstatServlet("/", controllerServlets, this)));
-		controllerServlets.add(new MapEntry<String,BaseServlet>("/pbsnodes", new PbsnodesServlet("/", controllerServlets, this)));
+		//build the webapp UI server
+		final List<Entry<String,HttpServlet>> controllerServlets = new ArrayList<>();
+		controllerServlets.add(new MapEntry<String,HttpServlet>("/", new QstatServlet("/", controllerServlets, this)));
+		controllerServlets.add(new MapEntry<String,HttpServlet>("/pbsnodes", new PbsnodesServlet("/", controllerServlets, this)));
+		//metrics is the Servlet from metrics.dropwizard for accessing metrics
+		controllerServlets.add(new MapEntry<String,HttpServlet>("/metrics", new MetricsServlet(metrics)));
+		//this is the hadoop servlet for accessing anything defined in JMX
+		controllerServlets.add(new MapEntry<String,HttpServlet>("/jmx", new JMXJsonServlet()));
 		final int httpport = pConf.getInt(PConfiguration.KEY_CONTROLLER_HTTP_PORT, Constants.DEFAULT_CONTROLLER_PORT+Constants.CONTROLLER_HTTP_PORT_OFFSET);		
 		LOG.info("Starting Jetty ProbosControllerHttp on port " + httpport);
 		webServer = new WebServer("ProbosControllerHttp", controllerServlets, httpport);
@@ -386,6 +410,74 @@ public class ControllerServer extends AbstractService implements PBSClient {
 		{
 			throw new IllegalArgumentException(probosFolder.toString() + " does not exist");
 		}
+		
+		//now initialise the metrics
+		
+		//jobs.queued.size
+		metrics.register(MetricRegistry.name(ControllerServer.class, "jobs", "queued.size"),
+			new Gauge<Integer>() {
+				@Override
+				public Integer getValue() {
+					int sum = 0;
+					for(int i :  user2QueuedCount.values())
+						sum += i;
+					return sum;
+				}
+			});
+		//jobs.size
+		metrics.register(MetricRegistry.name(ControllerServer.class, "jobs", "size"),
+			new Gauge<Integer>() {
+				@Override
+				public Integer getValue() {
+					return jobArray.size();
+				}
+			});
+		//jobs.held.size
+		metrics.register(MetricRegistry.name(ControllerServer.class, "jobs", "held.size"),
+			new Gauge<Integer>() {
+				@Override
+				public Integer getValue() {
+					return jobHolds.size();
+				}
+			});
+		
+		//nodes.size
+		metrics.register(MetricRegistry.name(ControllerServer.class, "nodes", "size"),
+				new Gauge<Integer>() {
+					@Override
+					public Integer getValue() {
+						try{
+							return getNodesStatus().length;
+						} catch (Exception e) {
+							return 0;
+						}
+					}
+				});
+		
+		//nodes.free.size
+		metrics.register(MetricRegistry.name(ControllerServer.class, "nodes", "free.size"),
+				new Gauge<Integer>() {
+					@Override
+					public Integer getValue() {
+						try{
+							PBSNodeStatus[] nodes = getNodesStatus();
+							int count = 0;
+							for(PBSNodeStatus n : nodes)
+								if ("free".equals(n.getState()))
+									count++;							
+							return count;
+						} catch (Exception e) {
+							return 0;
+						}
+					}
+				});
+		
+		runningJobs = metrics.counter(MetricRegistry.name(ControllerServer.class, "jobs", "running.counter"));
+		rejectedJobs = metrics.counter(MetricRegistry.name(ControllerServer.class, "jobs", "rejected.counter"));
+		killedJobs = metrics.counter(MetricRegistry.name(ControllerServer.class, "jobs", "killed.counter"));
+		mailEvents = metrics.counter(MetricRegistry.name(ControllerServer.class, "mails", "counter"));
+		mailFailures = metrics.counter(MetricRegistry.name(ControllerServer.class, "mails", "failure.counter"));
+		
 	}
 	
 	@Override
@@ -405,6 +497,8 @@ public class ControllerServer extends AbstractService implements PBSClient {
 		
 		watcherThread.start();
 		yClient = new YarnClientFactory(yConf).connect();
+		jmxMetricReporter = JmxReporter.forRegistry(metrics).build();
+		jmxMetricReporter.start();
 		notifyStarted();
 	}
 	
@@ -417,6 +511,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 		masterRpcserver.stop();
 		secretManager.stopThreads();
 		interactiveRpcserver.stop();
+		jmxMetricReporter.stop();
 		notifyStopped();
 	}
 	
@@ -443,10 +538,15 @@ public class ControllerServer extends AbstractService implements PBSClient {
 		final int maxUserQueueable = pConf.getInt(PConfiguration.KEY_JOB_MAX_USER_QUEUE, 5000);
 		final int maxQueueable = pConf.getInt(PConfiguration.KEY_JOB_MAX_QUEUE, 10000);
 		if (jobArray.size() > maxQueueable)
+		{
+			rejectedJobs.inc();
 			return -1;
+		}
 		if (user2QueuedCount.get(requestorUserName) > maxUserQueueable)
+		{
+			rejectedJobs.inc();
 			return -1;		
-		
+		}
 		int newId = nextJobId.incrementAndGet();
 		JobInformation ji = new JobInformation(newId, job);
 		jobArray.put(newId, ji);
@@ -457,6 +557,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 		{
 			jobArray.remove(newId);
 			user2QueuedCount.adjustOrPutValue(requestorUserName, -1, 0);
+			rejectedJobs.inc();
 			return -1;
 		}
 		
@@ -473,6 +574,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 			{
 				jobArray.remove(newId);
 				user2QueuedCount.adjustOrPutValue(requestorUserName, -1, 0);
+				rejectedJobs.inc();
 				return -1;
 			}
 		}
@@ -588,11 +690,13 @@ public class ControllerServer extends AbstractService implements PBSClient {
 				rtr = submitAction.run();
 			ji.proxyUser = proxyUser;
 			ji.modify();
+			runningJobs.inc();
 			return rtr.intValue();
 		} catch (Exception e) {
 			LOG.error("job did not submit!", e);
 			return -1;
 		}
+		
 	}
 	
 	@Override
@@ -677,7 +781,8 @@ public class ControllerServer extends AbstractService implements PBSClient {
 			status = proxyUser.doAs(doKill);
 		else 
 			status = doKill.run();
-		
+		runningJobs.dec();
+		killedJobs.inc();
 		//purge, aka qdel -p.
 		//conditional on superuser
 		if (purge)
@@ -1080,14 +1185,26 @@ public class ControllerServer extends AbstractService implements PBSClient {
 	@Override
 	public byte[] jobLog(int jobid, int arrayId, boolean stdout, long start, boolean URLonly) throws Exception
 	{
+		boolean masterRequest = false;
+		if (jobid < 0)
+		{
+			masterRequest = true;
+			jobid = -1 * jobid;
+		}
 		JobInformation ji = jobArray.get(jobid);
 		if (ji == null)
 			return new byte[0];
 		if (ji.kitten == null || ji.taskContainerId == null)
 			return new byte[0];
 		
-		String containerId;
-		if (ji.jobSpec.getArrayTaskIds() == null)//basic job
+		String containerId = null;
+		
+		//either its a master request, an array request, or the main job task
+		if (masterRequest) 
+		{
+			containerId = ji.masterContainerId;
+		}
+		else if (ji.jobSpec.getArrayTaskIds() == null)//basic job
 		{
 			containerId = ji.taskContainerId;
 		}
@@ -1095,6 +1212,8 @@ public class ControllerServer extends AbstractService implements PBSClient {
 		{
 			containerId = ji.array2Container.get(arrayId);
 		}
+		
+		
 		if (containerId == null || containerId.equals("DONE") || containerId.equals("ABORTED"))	
 		{
 			return new byte[0];
@@ -1183,6 +1302,12 @@ public class ControllerServer extends AbstractService implements PBSClient {
 	
 	class ApplicationMasterAPI implements PBSMasterClient
 	{
+		Counter amHeartbeatCounter = metrics.counter(MetricRegistry.name(ApplicationMasterAPI.class, "heartbeat.counter"));
+		Counter amJobEventCounter = metrics.counter(MetricRegistry.name(ApplicationMasterAPI.class, "jobevent.counter"));
+		Counter amJobEventTerminateCounter = metrics.counter(MetricRegistry.name(ApplicationMasterAPI.class, "jobevent.terminate.counter"));
+		Counter amJobArrayEventCounter = metrics.counter(MetricRegistry.name(ApplicationMasterAPI.class, "jobarrayevent.counter"));
+		Counter amJobArrayTerminateEventCounter = metrics.counter(MetricRegistry.name(ApplicationMasterAPI.class, "jobarrayevent.terminate.counter"));
+		
 		@Override
 		public long getProtocolVersion(String protocol, long clientVersion)
 				throws IOException {
@@ -1201,6 +1326,8 @@ public class ControllerServer extends AbstractService implements PBSClient {
 			//renewToken(jobId);
 			
 			LOG.info("Job=" + jobId + " Event="+e.toString() + " container="+containerId.toString());
+			amJobEventCounter.inc();
+			
 			JobInformation ji = jobArray.get(jobId);
 			
 			//prevent NPE
@@ -1237,6 +1364,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 					LOG.warn("Failed to get a diagnostic message", ex);
 				}
 				mailEvent(jobId, jobArray.get(jobId).jobSpec, MailEvent.ABORT, diagnosticMessage);
+				amJobEventTerminateCounter.inc();
 				break;
 			default:
 				break;			
@@ -1252,6 +1380,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 			//renewToken(jobId);
 			
 			LOG.info("Job=" + jobId + " Array="+arrayId+" Event="+e.toString() + " container="+containerId.toString()  + " message=" + message);
+			amJobArrayEventCounter.inc();
 			JobInformation ji = jobArray.get(jobId);
 			
 			//prevent NPE
@@ -1273,6 +1402,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 				case TERMINATE:
 					ji.array2Container.put(arrayId, "ABORTED");
 					mailEvent(jobId, ji.jobSpec, MailEvent.ABORT, null);
+					amJobArrayTerminateEventCounter.inc();
 					break;
 				default:
 					break;
@@ -1298,6 +1428,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 		@Override
 		public long heartbeat(int jobId, Token<ProbosDelegationTokenIdentifier> token) throws Exception {
 			LOG.info("Master heartbeat received from " + jobId);
+			amHeartbeatCounter.inc();
 			return renewToken(jobId, token);
 		}
 		

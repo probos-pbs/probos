@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -35,7 +36,7 @@ public class PbsnodesServlet extends BaseServlet {
 	
 	static final String NAME = "pbsnodes";
 	
-	public PbsnodesServlet(String uri, List<Entry<String,BaseServlet>> _servletNameSpace, PBSClient _pbsClient) {
+	public PbsnodesServlet(String uri, List<Entry<String,HttpServlet>> _servletNameSpace, PBSClient _pbsClient) {
 		super(NAME, uri, _servletNameSpace, _pbsClient);
 	}
 	

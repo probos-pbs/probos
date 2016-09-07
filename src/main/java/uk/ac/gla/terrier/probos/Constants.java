@@ -19,6 +19,7 @@ import java.io.File;
 
 public class Constants {
 
+	public static final String PRODUCT_FRIENDLY_NAME = "ProBoS";
 	public static final String PRODUCT_NAME = "probos";
 	public static final String PRODUCT_VERSION = Version.VERSION;
 	public static final String DIRECTIVE_PREFIX = "#PBS";

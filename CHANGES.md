@@ -1,6 +1,10 @@
 #Changes
 
-v0.2.11 - April 2015
+v0.2.12 - July 2016
+ * Added metrics using metrics.dropwizard.io (aka Codahale).
+ * JMX metrics exposed via HTTP RESTful interface
+
+v0.2.11 - April 2016
  * Added tracking URL to qstat output
  * Clarified logging in Controller wrt RPC port numbers
  * Added background image to servlets
@@ -8,14 +12,14 @@ v0.2.11 - April 2015
  * Maven fixes to prevent slf4j binding warnings
  * Increased timeouts for token renewal (in case a job doesn't start within 24 hours) 
 
-v0.2.10 - March 2015
+v0.2.10 - March 2016
  * Mavenize more, including version numbering
  * Fix sendmail
  * Fix unit tests and controller wrt absolute file paths
  * Use SLF4j and log4j, to permit CSD to configure logging
  * Fix token renewal
 
-v0.2.9 - February 2015
+v0.2.9 - February 2016
  * Tokens need to be renewed through master heartbeat
  * qsub should ignore the TERMCAP variable
  * #7: dont fill up user's home directory with probos job files
