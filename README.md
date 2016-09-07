@@ -64,6 +64,12 @@ To delete job with id 1:
 
 	qdel 1
 
+# License
+
+ProBoS is licensed under the Apache license, 2.0. See (LICENSE.txt)[LICENSE.txt]. 
+
+In addition, we ask that if you use ProBoS, you can let us know by adding your organisation's name to the list of (ProBoS users)[https://github.com/probos-pbs/probos/wiki/ProBoS-Users].
+
 # Small Print
 
 ProBoS was developed at the University of Glasgow - see [CREDITS.md](CREDITS.md) for more information.
