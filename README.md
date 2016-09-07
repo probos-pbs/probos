@@ -42,7 +42,7 @@ If you are not using the Cloudera installation method, you may have to add ProBo
 	#for bash:
 	export PATH=$PATH:/path/to/probos/bin
 
-# Testing your installation
+# Using ProBoS to Run Jobs
 
 You cannot submit jobs as the `yarn` user. Switch to a client user. You must perform Kerberos initialisation for your client user. You will be prompted for your password.
 
@@ -64,6 +64,10 @@ To submit a job:
 To delete job with id 1:
 
 	qdel 1
+
+# Other Features
+
+ProBoS has web UIs for both the controller (server), as well as each job. Goto `http://server:8029` to see the controller's UI, or follow the link from the ProBoS section of the Cloudera Manager web UI.
 
 # License
 
