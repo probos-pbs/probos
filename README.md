@@ -16,6 +16,7 @@ ProBoS supports the basic functionality of a PBS implementation, as traditionall
 | Hadoop YARN integration | No | Yes |
 | Scheduling control | Yes | (w/ YARN) |
 | Kerberos integration | (w/ OS) | Yes |
+| Web UIs | No | Yes |
 
 You can follow what's new in the latest release of ProBoS from [CHANGES.md](CHANGES.md).
 
