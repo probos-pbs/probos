@@ -66,7 +66,7 @@ To delete job with id 1:
 
 # License
 
-ProBoS is licensed under the Apache license, 2.0. See (LICENSE.txt)[LICENSE.txt]. 
+ProBoS is licensed under the Apache license, 2.0. See LICENSE.txt for more details.
 
 In addition, we ask that if you use ProBoS, you can let us know by adding your organisation's name to the list of (ProBoS users)[https://github.com/probos-pbs/probos/wiki/ProBoS-Users].
 
