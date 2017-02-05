@@ -93,6 +93,11 @@ public class qpeek extends Configured implements Tool {
 			if (sId.contains("[")) //it could specify an array id
 			{
 				String [] parts = sId.split("\\[|\\]");
+				if (parts.length != 2)
+				{
+					System.err.println("Invalid jobid[arrayId] specified");
+					return 1;
+				}
 				jobId = Integer.parseInt(parts[0]);
 				arId = Integer.parseInt(parts[1]);
 			}
