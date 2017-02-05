@@ -103,8 +103,8 @@ exit $exitcode;
 sub process_command
 {
 	my $command =shift;
-    my $command_esc= $command;
-    $command_esc =~ s/\"/\\"/g;
+	my $command_esc= $command;
+	$command_esc =~ s/\"/\\"/g;
 	my $rtr = "cd $PWD;\n";
 	if ($JOBQUIET != 0)
 	{
