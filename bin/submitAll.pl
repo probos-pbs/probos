@@ -76,7 +76,7 @@ if ($JOBCOUNT == $FIRST_JOBCOUNT)
 {
 	warn "WARN No jobs found on STDIN to submit\n";
 }
-elseif ($JOBCOUNT == 1)
+elsif ($JOBCOUNT == 1)
 {
 	#warn $lastCmd;
 	$qsubCmd = "|$QSUB -N \"$JOBNAME\" -V $ARGS -S /bin/bash";
