@@ -275,6 +275,7 @@ public class qsub extends Configured implements Tool {
 		
 		job.setCommand(new File(jobFilename).getCanonicalPath());
 		JobUtils.finaliseJob(job);
+		JobUtils.verifyJob(job);
 		return job;
 	}
 	

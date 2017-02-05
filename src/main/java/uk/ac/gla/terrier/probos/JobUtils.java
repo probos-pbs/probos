@@ -376,6 +376,29 @@ public class JobUtils {
 		
 	}
 	
+	/** Run some sanity checks on the job specification. In particular, if the PATH env var is overridden,
+	 * we verify that /bin and /usr/bin are present, as YARN shell scripts will fail without these. */
+	public static void verifyJob(PBSJob job) throws Exception
+	{
+		String path = job.getVariable_List().get("PATH");
+		if (path != null)
+		{
+			String[] components = path.split(":");
+			boolean foundBin = false;
+			boolean foundUsrBin = false;
+			for(String c : components)
+			{
+				if (c.equals("/bin") || c.equals("/bin/"))
+					foundBin = true;
+				if (c.equals("/usr/bin") || c.equals("/usr/bin/"))
+					foundUsrBin = true;
+			}
+			if (! foundBin)
+				throw new IllegalArgumentException("PATH was overridden, but /bin not found");
+			if (! foundUsrBin)
+				throw new IllegalArgumentException("PATH was overridden, but /usr/bin not found");
+		}
+	}
 
 	/** create a new job */
 	public static PBSJob createNewJob(String defaultJobName) throws Exception {
