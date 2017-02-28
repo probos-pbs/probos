@@ -29,6 +29,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.LocalResource;
+import org.apache.hadoop.yarn.api.records.Resource;
+import org.apache.hadoop.yarn.util.Records;
 import org.junit.Test;
 
 import uk.ac.gla.terrier.probos.Constants;
@@ -134,6 +136,32 @@ public class TestKittenUtils2 {
 		PBSJob job;
 		job = UtilsForTest.getSimpleJob("testLuaInteractive", "#PBS -I");
 		testJobCompilesClient(job);
+	}
+	
+	@Test
+	public void testLuaMemory() throws Exception {
+		PBSJob job;
+		int mem = 32000;
+		job = UtilsForTest.getSimpleJob("testLuaMemory", "#PBS -l nodes=1:mem=" + mem);
+		
+		LuaApplicationMasterParameters lamp = testJobCompilesMaster(job);
+		List<ContainerLaunchParameters> clpI = lamp.getContainerLaunchParameters();
+		assertEquals(1, clpI.size());
+		ContainerLaunchParameters clpTask = clpI.get(0);
+		Resource MAX = Records.newRecord(Resource.class);
+		Resource r;
+		MAX.setMemory(Integer.MAX_VALUE);
+		MAX.setVirtualCores(100);
+		r = clpTask.getContainerResource(MAX);
+		assertEquals(mem, r.getMemory());
+		assertEquals(1, r.getVirtualCores());
+		
+		MAX.setMemory(8192);
+		MAX.setVirtualCores(100);
+		r = clpTask.getContainerResource(MAX);
+		assertEquals(8192, r.getMemory());
+		assertEquals(1, r.getVirtualCores());
+		
 	}
 	
 
