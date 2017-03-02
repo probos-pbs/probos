@@ -29,6 +29,7 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.mortbay.log.Log;
 
 import uk.ac.gla.terrier.probos.api.PBSJob;
 
@@ -376,10 +377,11 @@ public class JobUtils {
 		
 	}
 	
-	/** Run some sanity checks on the job specification. In particular, if the PATH env var is overridden,
-	 * we verify that /bin and /usr/bin are present, as YARN shell scripts will fail without these. */
+	/** Run some sanity checks on the job specification. */
 	public static void verifyJob(PBSJob job) throws Exception
 	{
+		//(1) if the PATH env var is overridden, we verify that /bin 
+		// and /usr/bin are present, as YARN shell scripts will fail without these.
 		String path = job.getVariable_List().get("PATH");
 		if (path != null)
 		{
@@ -398,6 +400,17 @@ public class JobUtils {
 			if (! foundUsrBin)
 				throw new IllegalArgumentException("PATH was overridden, but /usr/bin not found");
 		}
+		
+		//(2) check filenames do not contain colons, and produce warnings for spaces too
+		String hostname = Utils.getHostname();
+		for(String jobOutputFile : new String[]{job.getOutput_Path(), job.getError_Path()})
+		{
+			String file = jobOutputFile.replaceAll("^" + hostname + ":", "");
+			if (file.contains(":"))
+				throw new IllegalArgumentException("Job output files with colons not yet supported: " + file);
+			if (file.contains(" "))
+				Log.warn("Job output files with spaces might not be supported: " + file);
+		}
 	}
 
 	/** create a new job */
@@ -407,7 +420,7 @@ public class JobUtils {
 		String hostname = Utils.getHostname();
 		String job_Name = defaultJobName;
 		
-	
+		//TODO this is a hard-coding. we need to work around this
 		String egroup = "csstaff";// exec("id -g -n");
 		final String cwd = System.getProperty("user.dir");
 	
