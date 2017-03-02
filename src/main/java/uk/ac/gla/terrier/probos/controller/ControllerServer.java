@@ -1470,7 +1470,32 @@ public class ControllerServer extends AbstractService implements PBSClient {
 //			}
 		}
 
+		@Override
+		public String[] getJobOutputFiles(int jobId) {
+			
+			String outFile = jobArray.get(jobId).jobSpec.getOutput_Path();
+			String errFile = jobArray.get(jobId).jobSpec.getError_Path();
+			String RCP = pConf.get(PConfiguration.KEY_RCP);
+			String[] rtr = new String[]{outFile,errFile, RCP};
+			
+			//we need to check if CP can be used fine for these paths.
+			for(int i=0;i<2;i++)
+			{
+				String path = rtr[i].split(":", 2)[1];
+				if (KittenUtils2.detectUseCp(pConf, path))
+					rtr[i] = path;
+			}
+			
+			return rtr;
+		}
 		
+		@Override
+		public String[] getJobArrayOutputFiles(int jobId, int arrayId) {
+			String[] rtr = this.getJobOutputFiles(jobId);
+			rtr[0] += "-" + arrayId;
+			rtr[1] += "-" + arrayId;
+			return rtr;
+		}
 		
 	}
 	

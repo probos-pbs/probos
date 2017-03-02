@@ -21,13 +21,13 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.Container;
 import org.apache.hadoop.yarn.api.records.ContainerId;
+import org.apache.hadoop.yarn.api.records.ContainerStatus;
 import org.apache.hadoop.yarn.api.records.NodeId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cloudera.kitten.ContainerLaunchParameters;
 import com.cloudera.kitten.appmaster.ApplicationMasterParameters;
@@ -132,6 +132,21 @@ public class ProbosApplicationMasterDistributedServiceImpl extends
 			{
 				tracker.kill();
 			}
+		}
+
+
+		@Override
+		public void onContainerStopped(ContainerStatus containerStatus) {
+			this.onContainerStopped(containerStatus.getContainerId());
+			String message = null;
+			int code;
+			if ( (code = containerStatus.getExitStatus()) != 0)
+			{
+				message = "(exit code "+code+") "+ containerStatus.getDiagnostics();
+				String[] paths = masterClient.getJobOutputFiles(jobId);
+				new Thread(new OuputFileWriter(">>PBS Job stopped: " + message, paths)).start();
+				LOG.error("Container "+containerStatus.getContainerId().toString()+" stopped: " + message);
+			}			
 		}
 
 

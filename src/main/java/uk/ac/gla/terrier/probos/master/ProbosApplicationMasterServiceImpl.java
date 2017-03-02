@@ -17,12 +17,15 @@ package uk.ac.gla.terrier.probos.master;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -195,7 +198,7 @@ public class ProbosApplicationMasterServiceImpl extends ApplicationMasterService
 	protected ContainerTracker getTracker(ContainerLaunchParameters clp) {
 		if (clp.getEnvironment().get("PBS_ARRAYID") != null)
 			return new ProbosArrayContainerTracker(clp);
-		return new ProbosContainerTracker(clp);
+		return new ProbosNormalContainerTracker(clp);
 	}
 	
 	@Override
@@ -203,7 +206,7 @@ public class ProbosApplicationMasterServiceImpl extends ApplicationMasterService
 		super.onContainersCompleted(containerList);
 		
 		//?*HACK*?
-		//for some reason, we dont observe onContainerStopped() being called 
+		//for some reason, we don't observe onContainerStopped() being called 
 		//until the end of the application, but onContainersCompleted() being
 		//called as expected. Hence, we map these through to help the Controller
 		//observe array task completions
@@ -212,7 +215,10 @@ public class ProbosApplicationMasterServiceImpl extends ApplicationMasterService
 			ContainerId cid = status.getContainerId();
 			for (ContainerTracker tracker : trackers) {
 				if (tracker.owns(cid))
-					tracker.onContainerStopped(cid);
+					if (tracker instanceof ProbosContainerTracker)
+						((ProbosContainerTracker)tracker).onContainerStopped(status);
+					else
+						tracker.onContainerStopped(cid);
 			}
 		}
 	}
@@ -227,6 +233,8 @@ public class ProbosApplicationMasterServiceImpl extends ApplicationMasterService
 		}
 	}
 	
+	/** a ContainerTracker for array jobs. a container failure does not indicate
+	 * a job failure */
 	protected class ProbosArrayContainerTracker extends ProbosContainerTracker {
 
 		int arrayId = 0;
@@ -245,6 +253,20 @@ public class ProbosApplicationMasterServiceImpl extends ApplicationMasterService
 		}
 
 		@Override
+		public void onContainerStopped(ContainerStatus containerStatus) {
+			super.onContainerStopped(containerStatus.getContainerId());
+			String message = null;
+			int code;
+			if ( (code = containerStatus.getExitStatus()) != 0)
+			{
+				message = "(exit code "+code+") "+ containerStatus.getDiagnostics();
+				String[] paths = masterClient.getJobArrayOutputFiles(jobId, arrayId);
+				new Thread(new OuputFileWriter(">>PBS Job array task stopped : " + message, paths)).start();
+			}
+			masterClient.jobArrayTaskEvent(jobId, arrayId, EventType.END, containerStatus.getContainerId().toString(), message);
+		}
+
+		@Override
 		public void onContainerStopped(ContainerId containerId) {
 			super.onContainerStopped(containerId);
 			masterClient.jobArrayTaskEvent(jobId, arrayId, EventType.END, containerId.toString(), null);
@@ -257,25 +279,35 @@ public class ProbosApplicationMasterServiceImpl extends ApplicationMasterService
 			String message = makeMessage(throwable);
 			masterClient.jobArrayTaskEvent(jobId, arrayId, EventType.TERMINATE, containerId.toString(), message);
 		}
-		
 	}
 	
-	protected class ProbosContainerTracker extends ContainerTracker {
+	
+	/** a ContainerTracker for normal jobs, rather than array jobs */
+	protected class ProbosNormalContainerTracker extends ProbosContainerTracker {
 		
-		int jobId;
-		boolean array = false;
-		int arrayId = 0;
-		
-		public ProbosContainerTracker(ContainerLaunchParameters parameters) {
+		public ProbosNormalContainerTracker(ContainerLaunchParameters parameters) {
 		    super(parameters);
-		    jobId = Integer.parseInt(parameters.getEnvironment().get("PBS_JOBID"));
 		}
-
+		
 		@Override
 		public void onContainerStarted(ContainerId containerId,
 				Map<String, ByteBuffer> allServiceResponse) {
 			super.onContainerStarted(containerId, allServiceResponse);
 			masterClient.jobEvent(jobId, EventType.START, containerId.toString(), null);
+		}
+
+		//a new containerStop event which records the ContainerStatus diagnostic message
+		public void onContainerStopped(ContainerStatus containerStatus) {
+			super.onContainerStopped(containerStatus.getContainerId());
+			String message = null;
+			int code;
+			if ( (code = containerStatus.getExitStatus()) != 0)
+			{
+				message = "(exit code "+code+") "+ containerStatus.getDiagnostics();
+				String[] paths = masterClient.getJobOutputFiles(jobId);
+				new Thread(new OuputFileWriter(">>PBS Job stopped: " + message, paths)).start();
+			}
+			masterClient.jobEvent(jobId, EventType.END, containerStatus.getContainerId().toString(), message);
 		}
 
 		@Override
@@ -292,6 +324,24 @@ public class ProbosApplicationMasterServiceImpl extends ApplicationMasterService
 			String message = makeMessage(throwable);
 			masterClient.jobEvent(jobId, EventType.TERMINATE, containerId.toString(), message);
 		}
+		
+	}
+	
+	/** a generic, abstract ContainerTracker for containers relating to probos.
+	 * we also expose a onContainerStopped(ContainerStatus) method that can be
+	 * called from onContainersCompleted() */
+	protected abstract class ProbosContainerTracker extends ContainerTracker {
+		
+		int jobId;
+		boolean array = false;
+		int arrayId = 0;
+		
+		protected ProbosContainerTracker(ContainerLaunchParameters parameters) {
+		    super(parameters);
+		    jobId = Integer.parseInt(parameters.getEnvironment().get("PBS_JOBID"));
+		}
+		
+		public abstract void onContainerStopped(ContainerStatus containerStatus);
 
 		protected String makeMessage(Throwable throwable) {
 			String message = null;
@@ -308,6 +358,108 @@ public class ProbosApplicationMasterServiceImpl extends ApplicationMasterService
 		}
 		
 	}
+
+	/** 
+	 * Runnable class for writing out/error files out in event of an error, using RCP if necessary 
+	 */
+	static class OuputFileWriter implements Runnable
+	{	
+		boolean append = true;
+        String message;
+        String[] paths;
+
+        public OuputFileWriter(String message, String[] paths) {
+                this.message = message;
+                this.paths = paths;
+        }
+        
+        /** write a file with the message to the specified location, using the specified RCP if necessary (based on the filename) */
+        void writeFile(String path, String rcp) throws Exception
+        {
+        	//path will start with "hostname:" if RCP is to be used (according to the controller)
+        	if ( ! path.contains(":"))
+        	{
+        		//write the file directly
+        		FileWriter fw = new FileWriter(path);
+				fw.write(message);
+				fw.close();
+				return;
+        	}
+        	if (append)
+        		appendRemotePath(path,rcp);
+        	else
+        		overwriteRemotePath(path, rcp);        	
+        }
+        
+        /** uses rsh/ssh to append the error message to the output file */
+        void appendRemotePath(String path, String rcp)
+        	throws IOException, InterruptedException
+        {
+        	//we assume these are accessible on the path for the ApplicationMaster process
+        	String rsh_command = rcp.endsWith("rcp") ? "rsh" : "ssh";
+        	
+        	File tempFile = File.createTempFile("joberr", ".file");
+        	FileWriter fw = new FileWriter(tempFile);
+        	fw.close();
+        	
+        	String[] parts = path.split(":", 2);
+        	String host = parts[0];
+        	String targetFile = parts[1];
+        	
+        	ProcessBuilder pb = new ProcessBuilder();
+        	String[] RSH_ARGS = new String[]{rsh_command, host, "cat >> " + targetFile};
+        	pb.redirectInput(tempFile);
+        	pb.command(RSH_ARGS);
+        	Process p = pb.start();
+        	p.waitFor();
+        	int exit = p.exitValue();
+        	if (exit != 0){
+        		LOG.warn("Could not append supplemental output file to " + path + " exit code "+ exit + " cmd=" + Arrays.toString(RSH_ARGS));
+        	}
+        	tempFile.delete();
+        }
+
+        /** uses rcp/scp to write the error message to the output file */
+		void overwriteRemotePath(String path, String rcp)
+				throws IOException, InterruptedException {
+			//this is a host path. we need to recover the path, 
+    		//write to a temporary file, then use RCP to copy it
+    		//to the client machine
+    		//String targetFilename;
+        	//String[] parts = path.split(":", 2);
+        	//path = parts[1];
+        	//String host = parts[0];
+        	
+        	File tempFile = File.createTempFile("joberr", ".file");
+        	FileWriter fw = new FileWriter(tempFile);
+        	fw.close();
+        	
+        	ProcessBuilder pb = new ProcessBuilder();
+        	String[] RCP_ARGS = new String[]{rcp, tempFile.toString(), path};
+        	pb.command(RCP_ARGS);
+        	Process p = pb.start();
+        	p.waitFor();
+        	int exit = p.exitValue();
+        	if (exit != 0){
+        		LOG.warn("Could not copy supplemental output file to " + path + " exit code "+ exit + " cmd=" + Arrays.toString(RCP_ARGS));
+        	}
+        	tempFile.delete();
+		}
+
+        @Override
+        public void run() {
+        	try{
+	        	//write stdout file, using specified RCP if necessary
+	        	writeFile(paths[0], paths[2]);
+	        	//write stdout file, using specified RCP if necessary
+	        	writeFile(paths[1], paths[2]);
+        	} catch (Exception e ) {
+        		LOG.warn("Problem writing supplemental output file", e);
+        	}
+        	
+        }
+	}
+
 	
 	class ProbosTokenRenewer extends TokenRenewer
 	{

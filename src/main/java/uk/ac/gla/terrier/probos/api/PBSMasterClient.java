@@ -49,6 +49,12 @@ public interface PBSMasterClient extends VersionedProtocol {
 	
 	public int getDistributedHostCount(int jobId);
 	
-	public long heartbeat(int jobId, Token<ProbosDelegationTokenIdentifier> token) throws Exception;
+	/** called by an application master to ensure that the token is kept up-to-date */
+  	public long heartbeat(int jobId, Token<ProbosDelegationTokenIdentifier> token) throws Exception;
+  
+	/** called by an application master on job failure, to write its own output file */
+	public String[] getJobOutputFiles(int jobId);
 	
+	/** called by an application master on array task failure, to write its own output file */
+	public String[] getJobArrayOutputFiles(int jobId, int arrayId);
 }
