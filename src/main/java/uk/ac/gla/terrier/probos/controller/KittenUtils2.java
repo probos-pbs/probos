@@ -33,7 +33,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 
@@ -479,21 +478,41 @@ public class KittenUtils2 {
 		
 		final String RCP = pConf.get(PConfiguration.KEY_RCP);
 		assert RCP != null && RCP.length() > 0;
+		final String path = split[1];
 		
+		boolean cp = detectUseCp(pConf, path);
+		String rtr = null;
+		if (cp)
+		{
+			rtr = "cp -v " + localSource + " " + path;
+		}
+		else
+		{
+			rtr = RCP + " -v " + localSource + " " + path;
+		}
+		//rtr = rtr + " >> /tmp/cp.log 2>&1  ";
+		LOG.debug("Copying " + localSource + " to " + hostDest + " using " +(cp ? "cp" : RCP));
+		//System.err.println(rtr);
+		return rtr;
+	}
+
+	public static boolean detectUseCp(Configuration pConf, final String path)
+	{
 		boolean cp = false;
 		final String[] USE_RCP_DIRS = pConf.getStrings(PConfiguration.KEY_RCP_USE);
+		
 		if (USE_RCP_DIRS != null)
 		{
 			if (LOG.isDebugEnabled())
 			{
-				LOG.debug("Checking is " + hostDest + " matches in " + Arrays.deepToString(USE_RCP_DIRS));
+				LOG.debug("Checking is " + path + " matches in " + Arrays.deepToString(USE_RCP_DIRS));
 			}
 			for(String prefix : USE_RCP_DIRS)
 			{
-				if (split[1].startsWith(prefix))
+				if (path.startsWith(prefix))
 				{
 					cp = true;
-					LOG.debug(split[1] + " matches in " + prefix);
+					LOG.debug(path + " matches in " + prefix);
 					break;
 				}
 			}
@@ -502,19 +521,7 @@ public class KittenUtils2 {
 		{
 			LOG.warn(PConfiguration.KEY_RCP_USE + " was null, it should normally be at least empty.");
 		}
-		String rtr = null;
-		if (cp)
-		{
-			rtr = "cp -v " + localSource + " " + split[1];
-		}
-		else
-		{
-			rtr = RCP + " -v " + localSource + " " + split[1];
-		}
-		//rtr = rtr + " >> /tmp/cp.log 2>&1  ";
-		LOG.debug("Copying " + localSource + " to " + hostDest + " using " +(cp ? "cp" : RCP));
-		//System.err.println(rtr);
-		return rtr;
+		return cp;
 	}
 	
 	static String luaKeyEscape(String name)
