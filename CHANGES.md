@@ -1,7 +1,12 @@
 #Changes
 
+v0.2.13 - February 2017
+ * [KITTEN] Better logging when resources are cut to cluster maximums
+ * Prevent job failures when /bin and /usr/bin are missing from the job's PATH
+ * When a job fails, make an output file is written with YARN's diagnostic message
+
 v0.2.12 - July 2016
- * Added metrics using metrics.dropwizard.io (aka Codahale).
+ * Added metrics using metrics.dropwizard.io (aka Codahale)
  * JMX metrics exposed via HTTP RESTful interface
 
 v0.2.11 - April 2016
