@@ -1,0 +1,12 @@
+{
+  "bin/probos": {
+    "permissions": "0755",
+    "user":  "root",
+    "group": "root"
+  },
+  "bin/submitAll.pl": {
+    "permissions": "0755",
+    "user":  "root",
+    "group": "root"
+  }
+}
