@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "ProBoS",
-  "version": "0.2.13-SNAPSHOT",
+  "version": "0.2.14-SNAPSHOT",
   "setActiveSymlink": true,
   "depends": "CDH",
   "conflicts": "",
@@ -10,7 +10,7 @@
   
    "packages": [
     { "name":    "ProBoS",
-      "version": "0.2.13-SNAPSHOT"
+      "version": "0.2.14-SNAPSHOT"
     }
    ],
    
@@ -20,9 +20,9 @@
    
    "components": [
     { "name":     "ProBoS",
-      "version":  "0.2.13-SNAPSHOT",
-      "pkg_version":  "0.2.13-SNAPSHOT",
-      "pkg_release": "0.2.13-SNAPSHOT"
+      "version":  "0.2.14-SNAPSHOT",
+      "pkg_version":  "0.2.14-SNAPSHOT",
+      "pkg_release": "0.2.14-SNAPSHOT"
     }
    ],
   

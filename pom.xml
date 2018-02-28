@@ -4,7 +4,7 @@
 	<groupId>uk.ac.gla.terrier</groupId>
 	<artifactId>probos</artifactId>
 	<packaging>jar</packaging>
-	<version>0.2.13-SNAPSHOT</version>
+	<version>0.2.14-SNAPSHOT</version>
 	<!-- when you bump the version number, remember to delete the old jar file 
 		from target/ -->
 	<name>probos</name>
