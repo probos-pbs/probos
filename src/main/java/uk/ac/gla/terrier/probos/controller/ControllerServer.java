@@ -32,6 +32,8 @@ import java.net.InetSocketAddress;
 import java.net.URL;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,18 +60,22 @@ import org.apache.hadoop.security.SecurityUtil;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.security.token.Token;
 import org.apache.hadoop.security.token.delegation.AbstractDelegationTokenSecretManager;
+import org.apache.hadoop.util.VersionInfo;
 import org.apache.hadoop.yarn.api.records.ApplicationAttemptId;
 import org.apache.hadoop.yarn.api.records.ApplicationAttemptReport;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.api.records.ApplicationSubmissionContext;
 import org.apache.hadoop.yarn.api.records.ContainerId;
 import org.apache.hadoop.yarn.api.records.ContainerReport;
 import org.apache.hadoop.yarn.api.records.ContainerState;
+import org.apache.hadoop.yarn.api.records.LogAggregationContext;
 import org.apache.hadoop.yarn.api.records.NodeReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.exceptions.ContainerNotFoundException;
+import org.apache.hadoop.yarn.util.Records;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -668,7 +674,26 @@ public class ControllerServer extends AbstractService implements PBSClient {
 				LOG.info("Master: Generated token for " + creds.toString() + " : " + delgationToken);
 				
 				
-				YarnClientService service = new YarnClientServiceImpl(params, creds);
+				YarnClientService service = new YarnClientServiceImpl(params, creds)
+				{
+					@Override
+					protected void submitApplication(ApplicationSubmissionContext appContext) {
+						 LogAggregationContext logAggregationContext = Records.newRecord(LogAggregationContext.class);
+						 if (! VersionInfo.getVersion().startsWith("2.6") )
+						 {
+							 try{
+							 logAggregationContext
+							 	.getClass()
+							 	.getMethod("setRolledLogsExcludePattern", new Class[]{String.class})
+							 	.invoke(logAggregationContext, "stderr|stdout");
+							 } catch (Exception e) {
+								 LOG.warn("Could not use setRolledLogsExcludePattern", e);
+							 }
+						 }
+						 appContext.setLogAggregationContext(logAggregationContext);
+						 super.submitApplication(appContext);
+					}					
+				};
 				service.startAndWait();
 				if (!service.isRunning()) {
 				     LOG.error("YarnClientService failed to startup, exiting...");
@@ -1119,6 +1144,13 @@ public class ControllerServer extends AbstractService implements PBSClient {
 		});
 		
 		List<NodeReport> nodeReports = yClient.getNodeReports();
+		Collections.sort(nodeReports, new Comparator<NodeReport>()
+		{
+			@Override
+			public int compare(NodeReport o1, NodeReport o2) {
+				return o1.getNodeId().getHost().compareTo(o2.getNodeId().getHost());
+			}			
+		});
 		
 		PBSNodeStatus[] rtr = new PBSNodeStatus[nodeReports.size()];
 		for (int i=0;i<rtr.length;i++)
@@ -1143,7 +1175,11 @@ public class ControllerServer extends AbstractService implements PBSClient {
 				state = "busy";
 			
 			StringBuilder status = new StringBuilder();
-			status.append("capacity=" + node.getCapability().toString());
+			//these emulate the Torque PBS implementation
+			status.append("ncpus=" + numProcs);
+			status.append(",physmem=" + node.getCapability().getMemory());
+			//these are our own formatting
+			status.append(",capacity=" + node.getCapability().toString());
 			status.append(",used=" + node.getUsed().toString());
 			
 			rtr[i] = new PBSNodeStatus(
