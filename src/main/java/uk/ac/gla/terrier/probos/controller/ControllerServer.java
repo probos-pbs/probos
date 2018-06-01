@@ -100,6 +100,7 @@ import uk.ac.gla.terrier.probos.common.MapEntry;
 import uk.ac.gla.terrier.probos.common.WebServer;
 import uk.ac.gla.terrier.probos.controller.webapp.PbsnodesServlet;
 import uk.ac.gla.terrier.probos.controller.webapp.QstatServlet;
+import uk.ac.gla.terrier.probos.controller.webapp.VersionServlet;
 
 import com.cloudera.kitten.client.YarnClientParameters;
 import com.cloudera.kitten.client.YarnClientService;
@@ -389,6 +390,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 		//build the webapp UI server
 		final List<Entry<String,HttpServlet>> controllerServlets = new ArrayList<>();
 		controllerServlets.add(new MapEntry<String,HttpServlet>("/", new QstatServlet("/", controllerServlets, this)));
+		controllerServlets.add(new MapEntry<String,HttpServlet>("/version", new VersionServlet("/", controllerServlets, this)));
 		controllerServlets.add(new MapEntry<String,HttpServlet>("/pbsnodes", new PbsnodesServlet("/", controllerServlets, this)));
 		//metrics is the Servlet from metrics.dropwizard for accessing metrics
 		controllerServlets.add(new MapEntry<String,HttpServlet>("/metrics", new MetricsServlet(metrics)));
