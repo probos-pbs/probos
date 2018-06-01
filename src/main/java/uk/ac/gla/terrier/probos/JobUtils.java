@@ -24,6 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import jnr.posix.POSIX;
+import jnr.posix.POSIXFactory;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -35,10 +38,24 @@ import uk.ac.gla.terrier.probos.api.PBSJob;
 
 public class JobUtils {
 	
-	/** env vars that should be copied into the job with PBS_O_ prefix */
+	/** env vars that should be copied into the job with PBS_O_ prefix, according to the PBS spec */
 	public static final String[] COPY_VARS = {"HOME", "LANG", "LOGNAME", "PATH", "MAIL", "SHELL", "TZ" };
 	
+	/** variables that should not be copied from the qsub environment */
 	public static final String[] BLACKLIST_VARS = {"TERMCAP"};
+	
+	/** variables that should be overridden from the yarn environment */
+	public static final String[] REMOVE_VARS = {"XDG_RUNTIME_DIR"};
+	
+	/** these are variables that should be set in the job based on the node being run on,
+	 * according to what login(3) would get from the passwd entry. See also getpwnam().
+	 * We dont have acces to this, so we copy from the qsub environment.
+	 */
+	public static final String[] COPY_PLAIN_VARS = {"HOME", "USER", "SHELL",
+			//"PATH"
+			//"LOGNAME", -- essentially deprecated
+			"MAIL" 
+	};
 	
 	/** qsub options not supported by ProBoS */
 	public static final char[] UNSUPPORTED_ARGS = {
@@ -371,6 +388,10 @@ public class JobUtils {
 		{
 			job.getVariable_List().remove(k);
 		}
+		for (String k : REMOVE_VARS)
+		{
+			job.getVariable_List().put(k, "");
+		}
 		
 		if (job.getMailUser() == null)
 			job.setMailUser(job.getEuser());
@@ -412,6 +433,8 @@ public class JobUtils {
 				Log.warn("Job output files with spaces might not be supported: " + file);
 		}
 	}
+	
+	static final POSIX posix = POSIXFactory.getPOSIX();
 
 	/** create a new job */
 	public static PBSJob createNewJob(String defaultJobName) throws Exception {
@@ -420,8 +443,7 @@ public class JobUtils {
 		String hostname = Utils.getHostname();
 		String job_Name = defaultJobName;
 		
-		//TODO this is a hard-coding. we need to work around this
-		String egroup = "csstaff";// exec("id -g -n");
+		String egroup = posix.getgrgid(posix.getegid()).getName();
 		final String cwd = System.getProperty("user.dir");
 	
 		//now build the job
@@ -441,6 +463,11 @@ public class JobUtils {
 		{
 			if (System.getenv(varName) != null)
 				env.put("PBS_O_"+ varName, System.getenv(varName));
+		}
+		for(String varName : JobUtils.COPY_PLAIN_VARS)
+		{
+			if (System.getenv(varName) != null)
+				env.put(varName, System.getenv(varName));
 		}
 	
 		env.put("PBS_ENVIRONMENT", "PBS_BATCH");
