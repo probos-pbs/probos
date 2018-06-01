@@ -21,6 +21,7 @@ package uk.ac.gla.terrier.probos;
 public class Version {
 
 	public static String VERSION = "${project.version}";
+	public static String BUILD_TIME = "${timestamp}";
 
 	public static void main(String[] args) {
 		System.out.println(VERSION);
