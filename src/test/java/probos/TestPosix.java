@@ -6,6 +6,8 @@ import jnr.posix.POSIXFactory;
 
 import org.junit.Test;
 
+import uk.ac.gla.terrier.probos.Utils;
+
 public class TestPosix {
 	//static final 
 
@@ -14,6 +16,12 @@ public class TestPosix {
 		POSIX posix = POSIXFactory.getPOSIX();
 		System.err.println(posix.isNative());
 		String egroup = posix.getgrgid(posix.getegid()).getName();
+		assertNotNull(egroup);
+	}
+	
+	@Test public void testGroupUtils()
+	{
+		String egroup = Utils.getGroup();
 		assertNotNull(egroup);
 	}
 }

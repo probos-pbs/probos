@@ -9,6 +9,7 @@
 		from target/ -->
 	<name>probos</name>
 	<properties>
+		<timestamp>${maven.build.timestamp}</timestamp>
 		<slf4j.version>1.7.14</slf4j.version>
 		<logback.version>1.0.1</logback.version>
 		<metrics.version>3.1.0</metrics.version>
