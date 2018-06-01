@@ -28,6 +28,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import jnr.posix.POSIX;
+import jnr.posix.POSIXFactory;
+
 import org.apache.commons.io.IOUtils;
 
 public class Utils {
@@ -66,6 +69,24 @@ public class Utils {
         
         return hostname;
     }
+	
+	static final POSIX posix = POSIXFactory.getPOSIX();
+
+	public static String getGroup() 
+	{
+		String rtr ;
+		try {
+			rtr = posix.getgrgid(posix.getegid()).getName();
+		} catch (IllegalStateException ise) {
+			//JNR-posix is playing silly buggers.
+			try{
+				rtr = execReadToString("/usr/bin/id -g -n");
+			} catch (IOException ioe) {
+				throw new IllegalStateException("Could not get group name from /usr/bin/id or from POSIX", ioe);
+			}
+		}
+		return rtr;
+	}
 
     public static String execReadToString(String execCommand) throws IOException {
         Process proc = Runtime.getRuntime().exec(execCommand);

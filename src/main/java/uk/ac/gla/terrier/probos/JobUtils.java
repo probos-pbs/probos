@@ -24,9 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import jnr.posix.POSIX;
-import jnr.posix.POSIXFactory;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -434,8 +431,7 @@ public class JobUtils {
 		}
 	}
 	
-	static final POSIX posix = POSIXFactory.getPOSIX();
-
+	
 	/** create a new job */
 	public static PBSJob createNewJob(String defaultJobName) throws Exception {
 	
@@ -443,7 +439,7 @@ public class JobUtils {
 		String hostname = Utils.getHostname();
 		String job_Name = defaultJobName;
 		
-		String egroup = posix.getgrgid(posix.getegid()).getName();
+		String egroup = Utils.getGroup();
 		final String cwd = System.getProperty("user.dir");
 	
 		//now build the job
