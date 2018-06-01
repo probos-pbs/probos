@@ -30,6 +30,7 @@ import org.junit.runners.Suite;
 	TestPConfiguration.class,
 	TestStaticMethods.class,
 	TestPBSClientProtocol.class,
+	TestPosix.class,
 	TestQstat.class,	
 	TestToken.class,
 	TestEndToEnd.class,
