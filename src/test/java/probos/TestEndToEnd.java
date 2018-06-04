@@ -61,6 +61,7 @@ public class TestEndToEnd {
 	File probosJobDir = null;
 	
 	@Before public void setupCluster() throws Exception {
+		//System.getenv().put("HADOOP_HOME", "/Users/craigm/Downloads/hadoop-2.6.0/");
 		System.setProperty("probos.home", System.getProperty("user.dir"));
 		(probosJobDir = new File(System.getProperty("user.dir"),"probos")).mkdir();
 		String name = "mycluster";
@@ -68,6 +69,9 @@ public class TestEndToEnd {
 		int numLocalDirs = 1;
 		int numLogDirs = 1;
 		YarnConfiguration conf = new YarnConfiguration();
+		//this prevents unit tests from working if > 90% disk usage
+		conf.setBoolean(YarnConfiguration.NM_DISK_HEALTH_CHECK_ENABLE, false);
+		conf.setFloat(YarnConfiguration.NM_MAX_PER_DISK_UTILIZATION_PERCENTAGE, 99.9F);
 		conf.setInt(YarnConfiguration.RM_SCHEDULER_MINIMUM_ALLOCATION_MB, 64);
 		conf.setClass(YarnConfiguration.RM_SCHEDULER,
 		              FifoScheduler.class, ResourceScheduler.class);
@@ -282,6 +286,7 @@ public class TestEndToEnd {
 						checkEnv.put(m.group(1), m.group(2));
 					}
 				}
+				assertFalse("HOME="+checkEnv.get("HOME"), checkEnv.get("HOME").equals("/home/"));
 				//System.err.println(checkEnv.toString());
 				for (String var : JobUtils.COPY_VARS)
 				{
@@ -323,7 +328,7 @@ public class TestEndToEnd {
 		testJobsConcurrent(2);
 	}
 	
-
+	
 	
 
 	@Test 

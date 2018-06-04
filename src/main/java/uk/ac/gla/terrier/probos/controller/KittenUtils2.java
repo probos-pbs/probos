@@ -27,14 +27,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.gla.terrier.probos.Constants;
 import uk.ac.gla.terrier.probos.PConfiguration;
@@ -109,7 +110,8 @@ public class KittenUtils2 {
 		w.println("job_env = cat {");
 		w.println("\tCLASSPATH = table.concat({\"${CLASSPATH}\", \"./kitten.jar\", \"./probos.jar\"}, \":\"),");
 		w.println("\tPBS_JOBID = \"" + String.valueOf(jobid) + "\",");
-		for(String k : job.getVariable_List().keySet())
+		
+		for(String k : new TreeSet<>(job.getVariable_List().keySet()))
 		{
 			String value = job.getVariable_List().get(k);
 			assert value != null : "Value for " + k + " was null";
@@ -161,6 +163,8 @@ public class KittenUtils2 {
 		//gitlab issue 7: tell Kitten where you want the temporary folder placed
 		w.println("  conf = {");
 		w.println("    [\""+ LocalDataHelper.APP_BASE_DIR + "\"] = \"" + pConf.get(PConfiguration.KEY_CONTROLLER_JOBDIR) + "\"");
+		//THIS DOENST WORK
+		//w.println("    [\""+ YarnConfiguration.NM_USER_HOME_DIR + "\"] = \"" + job.getVariable_List().get("HOME") + "\"");
 		w.println("  },");
 		
 		w.println("  resources = base_resources,");
@@ -212,6 +216,13 @@ public class KittenUtils2 {
 				LOG.warn("Invalid time expression " + wallTimeLimit + " - setting to default" + jobDuration + " seconds");
 			}
 		}
+		
+		//set HOME variable for containers by overriding the yarn configuration.
+		//THIS DOENST WORK
+		//w.println("  conf = {");
+		//w.println("    [\""+ YarnConfiguration.NM_USER_HOME_DIR + "\"] = \"" + job.getVariable_List().get("HOME") + "\"");
+		//w.println("  },");
+		
 		//kitten expects a timeout in ms
 		w.println(prefix + "timeout = " + String.valueOf(jobDuration*1000l) + ",");
 		
@@ -304,7 +315,10 @@ public class KittenUtils2 {
 	
 	protected String finalCommentPrefix()
 	{
-		return "mkdir -p $(pwd)/tmp; "; //make a tmp directory
+		String rtr = "mkdir -p $(pwd)/tmp; "; //make a tmp directory
+		if (job.getVariable_List().containsKey("HOME"))
+			rtr += " export HOME='"+job.getVariable_List().get("HOME") + "' ;"; 
+		return rtr;
 	}
 	
 	protected String finalCommentSuffix()
