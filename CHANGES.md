@@ -1,5 +1,13 @@
 #Changes
 
+v0.2.15 - February 2018
+ * #3 HOME should be set, XDG_RUNTIME_DIR should not be set.
+
+v0.2.14 - February 2018
+ * [KITTEN] Allow ApplicationSubmissionContext to be overridden
+ * #1 Container log urls have extra http appended.
+ * #2 YARN's NodeManager Container rolling logs causes problems (e.g. qpeek not working) [Fix for Hadoop 2.7.0+ only]
+
 v0.2.13 - February 2017
  * [KITTEN] Better logging when resources are cut to cluster maximums
  * Prevent job failures when /bin and /usr/bin are missing from the job's PATH
