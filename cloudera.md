@@ -28,3 +28,10 @@ Roughly:
 	sudo cp probos-csd/target/PROBOS-0.2.4.jar /opt/cloudera/csd/PROBOS-0.2.4.jar
 	sudo service cloudera-scm-server restart
 
+## Configuring CDH 5
+
+CDH ships with Hadoop 2.6. This has backported fixes, but not functionality required for the safe operation of ProBoS. In particular, job outputs can go missing as rolling log aggregation is turned on by default. 
+
+To address this, for all CDH 5 versions, you should alter/ensure your YARN configuration to have the following parameter: 
+
+	yarn.nodemanager.log-aggregation.roll-monitoring-interval-seconds=-1
