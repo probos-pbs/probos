@@ -1260,7 +1260,6 @@ public class ControllerServer extends AbstractService implements PBSClient {
 		try{
 			ContainerReport cs = yClient.getContainerReport(ContainerId.fromString(containerId));
 			String url = cs.getLogUrl() + (stdout ? "/stdout" : "/stderr") + "?start="+start;
-			
 			//some hadoop version do not prepend the protocol to the URL. fix, if necessary
 			if (! url.startsWith("http"))
 				url = "http:" + url;
