@@ -164,6 +164,32 @@ public class TestKittenUtils2 {
 		
 	}
 	
+	@Test
+	public void testLuaMemoryCmdline() throws Exception {
+		PBSJob job;
+		int mem = 32000;
+		job = UtilsForTest.getSimpleJob("testLuaMemory", "export", new String[]{"-l", "nodes=1:mem=" + mem});
+		
+		LuaApplicationMasterParameters lamp = testJobCompilesMaster(job);
+		List<ContainerLaunchParameters> clpI = lamp.getContainerLaunchParameters();
+		assertEquals(1, clpI.size());
+		ContainerLaunchParameters clpTask = clpI.get(0);
+		Resource MAX = Records.newRecord(Resource.class);
+		Resource r;
+		MAX.setMemory(Integer.MAX_VALUE);
+		MAX.setVirtualCores(100);
+		r = clpTask.getContainerResource(MAX);
+		assertEquals(mem, r.getMemory());
+		assertEquals(1, r.getVirtualCores());
+		
+		MAX.setMemory(8192);
+		MAX.setVirtualCores(100);
+		r = clpTask.getContainerResource(MAX);
+		assertEquals(8192, r.getMemory());
+		assertEquals(1, r.getVirtualCores());
+		
+	}
+	
 
 	@Test
 	public void testLuaDistributed() throws Exception {

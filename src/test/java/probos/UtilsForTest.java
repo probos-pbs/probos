@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.hadoop.ipc.ProtocolSignature;
 
@@ -110,13 +112,25 @@ public class UtilsForTest {
 		return jobScript;
 	}
 	
-	public static PBSJob getSimpleJob(String name, String command) throws Exception
+	public static PBSJob getSimpleJob(String name, String command, String[] args) throws Exception
 	{
 		File jobScript = createJobScript(command);
+		
+		List<String> commands = new ArrayList<>();
+		commands.add("-N");
+		commands.add(name);
+		for (String x : args)
+			commands.add(x);
+		commands.add(jobScript.toString());
 				
 		qsub q = new qsub();
-		PBSJob job1 = q.createJob(new String[]{"-N", name, jobScript.toString()});
+		PBSJob job1 = q.createJob(commands.toArray(new String[0]));
 		return job1;
+	}
+	
+	public static PBSJob getSimpleJob(String name, String command) throws Exception
+	{
+		return getSimpleJob(name, command, new String[0]);
 	}
 	
 }
