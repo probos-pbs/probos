@@ -19,6 +19,7 @@ import gnu.trove.list.array.TIntArrayList;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Arrays;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -90,6 +91,7 @@ public class qstat extends Configured implements Tool {
 		if (args.length == 0)
 		{
 			jobids = c.getJobs();
+			Arrays.sort(jobids);
 		}
 		else
 		{
