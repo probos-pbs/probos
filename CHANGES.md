@@ -2,6 +2,7 @@
 
 v0.2.15 - February 2018
  * #3 HOME should be set, XDG_RUNTIME_DIR should not be set.
+ * #4 CLASSPATH should not be set by default
 
 v0.2.14 - February 2018
  * [KITTEN] Allow ApplicationSubmissionContext to be overridden
