@@ -309,19 +309,25 @@ public class KittenUtils2 {
 		if (DEBUG_TASKS)
 			finalCommand = "echo '" + finalCommand + "' 1>> <LOG_DIR>/stdout 2>><LOG_DIR>/stderr ; "  + finalCommand;
 		
-		final String finalCmd = finalCommentPrefix() + finalCommand + finalCommentSuffix() + " exit \\\\${EXIT}; ";
+		final String finalCmd = finalCommandPrefix() + finalCommand + finalCommandSuffix() + " exit \\\\${EXIT}; ";
 		printContainer(jt_id, finalCmd, w, prefix, extraEnv, nr);
 	}
 	
-	protected String finalCommentPrefix()
+	protected String finalCommandPrefix()
 	{
 		String rtr = "mkdir -p $(pwd)/tmp; "; //make a tmp directory
 		if (job.getVariable_List().containsKey("HOME"))
 			rtr += " export HOME='"+job.getVariable_List().get("HOME") + "' ;"; 
+		
+		//issue #4, CLASSPATH gets set unexpectedly by YARN
+		if (job.getVariable_List().containsKey("CLASSPATH"))
+			rtr += " export CLASSPATH='"+job.getVariable_List().get("CLASSPATH") + "' ;"; 
+		else
+			rtr += " export CLASSPATH='' ;"; 
 		return rtr;
 	}
 	
-	protected String finalCommentSuffix()
+	protected String finalCommandSuffix()
 	{
 		return "";
 	}
