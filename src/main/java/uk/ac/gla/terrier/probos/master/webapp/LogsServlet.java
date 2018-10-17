@@ -74,6 +74,7 @@ public class LogsServlet extends BaseServlet {
 					
 					ps.println("<li>" + 
 						String.valueOf(aid) + ": <a href=\""+stdout+"\">stdout</a>" + ", " + "<a href=\""+stderr+"\">stderr</a>"
+						+"("+array2cid.get(aid)+")"
 						+"</li>");					
 				}
 				ps.println("</ul>");
