@@ -150,16 +150,16 @@ public class TestKittenUtils2 {
 		ContainerLaunchParameters clpTask = clpI.get(0);
 		Resource MAX = Records.newRecord(Resource.class);
 		Resource r;
-		MAX.setMemory(Integer.MAX_VALUE);
+		MAX.setMemorySize(Integer.MAX_VALUE);
 		MAX.setVirtualCores(100);
 		r = clpTask.getContainerResource(MAX);
-		assertEquals(mem, r.getMemory());
+		assertEquals(mem, r.getMemorySize());
 		assertEquals(1, r.getVirtualCores());
 		
-		MAX.setMemory(8192);
+		MAX.setMemorySize(8192);
 		MAX.setVirtualCores(100);
 		r = clpTask.getContainerResource(MAX);
-		assertEquals(8192, r.getMemory());
+		assertEquals(8192, r.getMemorySize());
 		assertEquals(1, r.getVirtualCores());
 		
 	}
@@ -176,16 +176,16 @@ public class TestKittenUtils2 {
 		ContainerLaunchParameters clpTask = clpI.get(0);
 		Resource MAX = Records.newRecord(Resource.class);
 		Resource r;
-		MAX.setMemory(Integer.MAX_VALUE);
+		MAX.setMemorySize(Integer.MAX_VALUE);
 		MAX.setVirtualCores(100);
 		r = clpTask.getContainerResource(MAX);
-		assertEquals(mem, r.getMemory());
+		assertEquals(mem, r.getMemorySize());
 		assertEquals(1, r.getVirtualCores());
 		
-		MAX.setMemory(8192);
+		MAX.setMemorySize(8192);
 		MAX.setVirtualCores(100);
 		r = clpTask.getContainerResource(MAX);
-		assertEquals(8192, r.getMemory());
+		assertEquals(8192, r.getMemorySize());
 		assertEquals(1, r.getVirtualCores());
 		
 	}

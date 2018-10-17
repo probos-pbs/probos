@@ -1179,7 +1179,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 			StringBuilder status = new StringBuilder();
 			//these emulate the Torque PBS implementation
 			status.append("ncpus=" + numProcs);
-			status.append(",physmem=" + node.getCapability().getMemory());
+			status.append(",physmem=" + node.getCapability().getMemorySize());
 			//these are our own formatting
 			status.append(",capacity=" + node.getCapability().toString());
 			status.append(",used=" + node.getUsed().toString());
