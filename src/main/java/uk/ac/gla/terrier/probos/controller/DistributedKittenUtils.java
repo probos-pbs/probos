@@ -124,18 +124,18 @@ public class DistributedKittenUtils extends KittenUtils2 {
 	}
 	
 	@Override
-	protected String finalCommentPrefix()
+	protected String finalCommandPrefix()
 	{
-		String rtr = super.finalCommentPrefix();
+		String rtr = super.finalCommandPrefix();
 		rtr += " export PBS_NODEFILE=$(pwd)/tmp/nodefile; ";
 		rtr += " echo \\\\${PBS_NODELIST_EX} | sed 's/,/ /g' | xargs -n1 echo > \\\\${PBS_NODEFILE} ; ";
 		return rtr;
 	}
 	
 	@Override
-	protected String finalCommentSuffix()
+	protected String finalCommandSuffix()
 	{
-		String rtr = super.finalCommentSuffix();
+		String rtr = super.finalCommandSuffix();
 		return rtr + " rm -f \\\\${PBS_NODEFILE}; ";
 	}
 	
