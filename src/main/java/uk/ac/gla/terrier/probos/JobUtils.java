@@ -29,7 +29,6 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.mortbay.log.Log;
 
 import uk.ac.gla.terrier.probos.api.PBSJob;
 
@@ -426,8 +425,8 @@ public class JobUtils {
 			String file = jobOutputFile.replaceAll("^" + hostname + ":", "");
 			if (file.contains(":"))
 				throw new IllegalArgumentException("Job output files with colons not yet supported: " + file);
-			if (file.contains(" "))
-				Log.warn("Job output files with spaces might not be supported: " + file);
+			if (file.contains(" "))//TODO fix
+				System.err.println("Job output files with spaces might not be supported: " + file);
 		}
 	}
 	
