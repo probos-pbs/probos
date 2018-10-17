@@ -1,4 +1,4 @@
-#Changes
+# Changes
 
 v0.2.15 - February 2018
  * #3 HOME should be set, XDG_RUNTIME_DIR should not be set.
