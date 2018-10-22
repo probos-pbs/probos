@@ -4,7 +4,7 @@
 	<groupId>uk.ac.gla.terrier</groupId>
 	<artifactId>probos</artifactId>
 	<packaging>jar</packaging>
-	<version>0.2.15-SNAPSHOT</version>
+	<version>0.3.0-SNAPSHOT</version>
 	<!-- when you bump the version number, remember to delete the old jar file 
 		from target/ -->
 	<name>probos</name>
@@ -17,6 +17,8 @@
 	</properties>
 
 	<repositories>
+
+<!--
 		<repository>
 			<id>maven-hadoop</id>
 			<name>Hadoop Releases</name>
@@ -27,7 +29,7 @@
 			<name>Cloudera Repos</name>
 			<url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
 		</repository>
-
+-->
 	</repositories>
 
 	<dependencies>
@@ -40,7 +42,7 @@
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-common</artifactId>
-			<version>2.6.0</version>
+			<version>3.0.1</version>
 			<scope>provided</scope>
 
 			<exclusions>
@@ -67,7 +69,7 @@
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-yarn-client</artifactId>
-			<version>2.6.0</version>
+			<version>3.0.1</version>
 			<scope>provided</scope>
 			<exclusions>
 				<exclusion>
@@ -80,21 +82,21 @@
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-yarn-server-tests</artifactId>
-			<version>2.6.0</version>
+			<version>3.0.1</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-yarn-api</artifactId>
-			<version>2.6.0</version>
+			<version>3.0.1</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-yarn-server-common</artifactId>
-			<version>2.6.0</version>
+			<version>3.0.1</version>
 			<scope>provided</scope>
 
 		</dependency>
@@ -102,7 +104,7 @@
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-yarn-server-resourcemanager</artifactId>
-			<version>2.6.0</version>
+			<version>3.0.1</version>
 			<scope>provided</scope>
 			<exclusions>
 				<exclusion>
@@ -115,7 +117,7 @@
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-yarn-server-nodemanager</artifactId>
-			<version>2.6.0</version>
+			<version>3.0.1</version>
 			<scope>provided</scope>
 			<exclusions>
 				<exclusion>
@@ -128,7 +130,7 @@
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-minicluster</artifactId>
-			<version>2.6.0</version>
+			<version>3.0.1</version>
 			<scope>provided</scope>
 			<exclusions>
 				<exclusion>
@@ -146,19 +148,19 @@
 		<dependency>
 			<groupId>com.cloudera.kitten</groupId>
 			<artifactId>kitten-client</artifactId>
-			<version>0.3.0</version>
+			<version>0.4.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.cloudera.kitten</groupId>
 			<artifactId>kitten-master</artifactId>
-			<version>0.3.0</version>
+			<version>0.4.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.cloudera.kitten</groupId>
 			<artifactId>kitten-common</artifactId>
-			<version>0.3.0</version>
+			<version>0.4.0</version>
 		</dependency>
 
 		<dependency>
@@ -176,13 +178,13 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>9.2.9.v20150224</version>
+			<version>9.3.19.v20170502</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-webapp</artifactId>
-			<version>9.2.9.v20150224</version>
+			<version>9.3.19.v20170502</version>
 		</dependency>
 
 		<dependency>
