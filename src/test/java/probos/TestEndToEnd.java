@@ -237,7 +237,6 @@ public class TestEndToEnd {
 			
 			
 			int jobid = qs.submitJob(j);
-			assertEquals(i, jobid);
 			new qstat().run(new String[]{"-n"});
 			Thread.sleep(1000);
 			while(true)
@@ -249,7 +248,12 @@ public class TestEndToEnd {
 					char state = qs.c.getJobStatus(jobid, 0).getState();
 					System.err.println(jobid + " " + state);
 					if (state == 'R')
+					{
+						System.err.println("QPEEK");
 						new qpeek().run(new String[]{String.valueOf(jobid)});
+						System.err.println("PBSNODES");
+						new pbsnodes(qs.c, System.err).run(new String[0]);
+					}
 				}
 				else
 				{
