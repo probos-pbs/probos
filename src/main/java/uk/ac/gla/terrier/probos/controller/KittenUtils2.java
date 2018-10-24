@@ -367,7 +367,7 @@ public class KittenUtils2 {
 		}
 	}
 
-	static Pattern MEMCOUNT = Pattern.compile("^mem=(\\d+)$");
+	static Pattern MEMCOUNT = Pattern.compile("^mem=(\\d+[gG]?)$");
 	static Pattern PPNCOUNT = Pattern.compile("^ppn=(\\d+)$");
 	static Pattern COUNT = Pattern.compile("^\\d+");	
 	
@@ -450,7 +450,14 @@ public class KittenUtils2 {
 				}
 				else if ( (m = MEMCOUNT.matcher(portion)).matches() )
 				{
-					mem = Integer.parseInt(m.group(1));
+					String memdefn = m.group(1);					
+					if (memdefn.toLowerCase().endsWith("g"))
+					{
+						mem = Integer.parseInt(memdefn.substring(0, memdefn.length()-1));
+						mem = mem * 1024;
+					} else {
+						mem = Integer.parseInt(memdefn);
+					}					
 				}
 				else if (isNode(portion))
 				{
