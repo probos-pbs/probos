@@ -294,6 +294,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 	
 	public ControllerServer(Configuration _hconf) throws IOException
 	{
+		Constants.constantsVerification();
 		this.yConf = new YarnConfiguration(_hconf);
 		yConf.addResource("yarn-site.xml");
 		UserGroupInformation.setConfiguration(yConf);
@@ -1144,6 +1145,9 @@ public class ControllerServer extends AbstractService implements PBSClient {
 				return true;
 			}
 		});
+//		System.err.println(job2con);
+//		System.err.println(node2job);
+		
 		
 		List<NodeReport> nodeReports = yClient.getNodeReports();
 		Collections.sort(nodeReports, new Comparator<NodeReport>()
@@ -1171,7 +1175,6 @@ public class ControllerServer extends AbstractService implements PBSClient {
 				jobs = new int[0];
 			else
 				jobs = jobList.toArray();
-			
 			String state = "free";
 			if (numContainers >= numProcs)
 				state = "busy";
