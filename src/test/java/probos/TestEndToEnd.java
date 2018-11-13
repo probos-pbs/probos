@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.server.MiniYARNCluster;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.ResourceScheduler;
@@ -45,6 +46,7 @@ import org.junit.Test;
 import uk.ac.gla.terrier.probos.JobUtils;
 import uk.ac.gla.terrier.probos.Utils;
 import uk.ac.gla.terrier.probos.api.PBSJob;
+import uk.ac.gla.terrier.probos.api.PBSJobStatusFat;
 import uk.ac.gla.terrier.probos.api.PBSJobStatusInteractive;
 import uk.ac.gla.terrier.probos.api.PBSJobStatusLight;
 import uk.ac.gla.terrier.probos.cli.pbsnodes;
@@ -249,7 +251,9 @@ public class TestEndToEnd {
 				{
 					PBSJobStatusLight jobStatus = qs.c.getJobStatus(jobid, 0);
 					char state = jobStatus.getState();
+					
 					assertEquals(name, jobStatus.getJob_Name());
+					
 					System.err.println(jobid + " " + state);
 					if (state == 'R')
 					{
@@ -258,6 +262,11 @@ public class TestEndToEnd {
 						System.err.println("PBSNODES");
 						new pbsnodes(qs.c, System.err).run(new String[0]);
 					}
+					
+					PBSJobStatusFat fatStatus = (PBSJobStatusFat) qs.c.getJobStatus(jobid, 2);
+					String argLine = StringUtils.join(fatStatus.getJob().getSubmit_args(), " ");
+					assertTrue(argLine.contains("-N " + name));
+					
 				}
 				else
 				{
