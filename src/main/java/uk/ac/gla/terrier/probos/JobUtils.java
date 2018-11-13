@@ -191,8 +191,9 @@ public class JobUtils {
 		if (cmd.hasOption('N'))
 		{
 			String job_Name = cmd.getOptionValue('N');
-			if (job_Name.length() > 15)
-				job_Name = job_Name.substring(0, 15);
+			//Job names and outputs files are truncated #10
+			//if (job_Name.length() > 15)
+			//	job_Name = job_Name.substring(0, 15);
 			job.setJob_Name(job_Name);
 		}
 		

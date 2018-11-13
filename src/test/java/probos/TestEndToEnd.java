@@ -46,6 +46,7 @@ import uk.ac.gla.terrier.probos.JobUtils;
 import uk.ac.gla.terrier.probos.Utils;
 import uk.ac.gla.terrier.probos.api.PBSJob;
 import uk.ac.gla.terrier.probos.api.PBSJobStatusInteractive;
+import uk.ac.gla.terrier.probos.api.PBSJobStatusLight;
 import uk.ac.gla.terrier.probos.cli.pbsnodes;
 import uk.ac.gla.terrier.probos.cli.qpeek;
 import uk.ac.gla.terrier.probos.cli.qstat;
@@ -214,6 +215,7 @@ public class TestEndToEnd {
 		
 		for(int i=1;i<=n;i++)
 		{
+			String name = "testEnv" + "-1234567890-" + i; //check longer than 17
 			File job = File.createTempFile("test", ".sh");
 			PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(job)));
 			pw.println("#!/bin/bash");
@@ -226,7 +228,7 @@ public class TestEndToEnd {
 			tmpInitDir.delete();
 			tmpInitDir.mkdir();
 			assertNotNull(tmpInitDir.toString());
-			PBSJob j = qs.createJob(new String[]{"-N", "testEnv", "-d", tmpInitDir.toString(), job.toString()});
+			PBSJob j = qs.createJob(new String[]{"-N", name, "-d", tmpInitDir.toString(), job.toString()});
 			
 			String stdOut = j.getOutput_Path() + String.valueOf(i);
 			String stdErr = j.getError_Path() + String.valueOf(i);
@@ -245,7 +247,9 @@ public class TestEndToEnd {
 				TIntHashSet jobids = new TIntHashSet(qs.c.getJobs());
 				if (jobids.contains(jobid))
 				{
-					char state = qs.c.getJobStatus(jobid, 0).getState();
+					PBSJobStatusLight jobStatus = qs.c.getJobStatus(jobid, 0);
+					char state = jobStatus.getState();
+					assertEquals(name, jobStatus.getJob_Name());
 					System.err.println(jobid + " " + state);
 					if (state == 'R')
 					{
