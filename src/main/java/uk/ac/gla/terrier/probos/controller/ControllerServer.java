@@ -899,14 +899,15 @@ public class ControllerServer extends AbstractService implements PBSClient {
 					state = 'E';
 					break;
 				case RUNNING:
-					state = 'R';
+					state = appReport.getApplicationResourceUsageReport().getNumUsedContainers() > 1
+							? 'R' //running
+							: 'S'; //at least a master container has started - so "Started"/"Suspended"
 					break;
 				default:
 					state = '?';
 					break;				
 				}
 		}
-		
 		String timeUse = appReport == null
 				? "0"
 				: Utils.makeTime( appReport.getApplicationResourceUsageReport().getVcoreSeconds() );
@@ -1139,7 +1140,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 							node2job.put(hostname, jobs = new TIntArrayList());
 						jobs.add(jobId);
 					} catch (Exception e) {
-						throw new RuntimeException(e);
+						LOG.warn("Could not getContainerReport", e);
 					}					
 				}
 				return true;
