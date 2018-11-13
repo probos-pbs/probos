@@ -44,7 +44,7 @@ public class ArrayKittenUtils extends KittenUtils2 {
 			//w.println("  array"+id+" = {");
 			w.println("  {");
 			extraEnv.put("PBS_ARRAYID", String.valueOf(id));
-			printTaskContainer(String.valueOf(jobid) + "-" + id, targetScript,w,"   ", extraEnv, super.nodeSpec);
+			printTaskContainer("-" + id, targetScript,w,"   ", extraEnv, super.nodeSpec);
 			w.println("  },");
 		}
 		w.println(" }");
