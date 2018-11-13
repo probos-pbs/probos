@@ -146,7 +146,7 @@ public class KittenUtils2 {
 		//plain single node job
 		w.println(" container = {");
 		w.println("  instances = 1,");
-		printTaskContainer(String.valueOf(jobid), targetScript, w, "  ", Collections.<String,String>emptyMap(), this.nodeSpec);
+		printTaskContainer("", targetScript, w, "  ", Collections.<String,String>emptyMap(), this.nodeSpec);
 		w.println(" }");
 	}
 
@@ -255,7 +255,7 @@ public class KittenUtils2 {
 		w.println(prefix + "command = \"" + command + "\"" );
 	}
 
-	protected void printTaskContainer(String jt_id, Path targetScript, PrintWriter w, String prefix, Map<String,String> extraEnv, NodeRequest nr)
+	protected void printTaskContainer(String logSuffix, Path targetScript, PrintWriter w, String prefix, Map<String,String> extraEnv, NodeRequest nr)
 	{	
 		//its important to have an absolute path, lets just check this here
 		assert targetScript.isUriPathAbsolute() : targetScript.toString() + " is not absolute";
@@ -277,14 +277,14 @@ public class KittenUtils2 {
 		if (jobJoin == null)
 		{
 			stdOutErrRedirect = "1>> <LOG_DIR>/stdout 2>> <LOG_DIR>/stderr";
-			stdOutErrCopy = prepareCopy(pConf, "<LOG_DIR>/stdout", job.getOutput_Path()+ jt_id) + " ; " +
-					" " + prepareCopy(pConf, "<LOG_DIR>/stderr", job.getError_Path()+ jt_id);
+			stdOutErrCopy = prepareCopy(pConf, "<LOG_DIR>/stdout", job.getOutput_Path()+ logSuffix) + " ; " +
+					" " + prepareCopy(pConf, "<LOG_DIR>/stderr", job.getError_Path()+ logSuffix);
 		} else if (jobJoin.equals("oe")) {
 			stdOutErrRedirect = "1>> <LOG_DIR>/stdout 2>&1 ";
-			stdOutErrCopy = prepareCopy(pConf, "<LOG_DIR>/stdout", job.getOutput_Path()+ jt_id);
+			stdOutErrCopy = prepareCopy(pConf, "<LOG_DIR>/stdout", job.getOutput_Path()+ logSuffix);
 		} else if (jobJoin.equals("eo")) {
 			stdOutErrRedirect = "2>> <LOG_DIR>/stdout 1>&2 ";
-			stdOutErrCopy = prepareCopy(pConf, "<LOG_DIR>/stderr", job.getError_Path()+ jt_id);
+			stdOutErrCopy = prepareCopy(pConf, "<LOG_DIR>/stderr", job.getError_Path()+ logSuffix);
 		} else {
 			throw new IllegalArgumentException("invalid job join: " + jobJoin);
 		}
@@ -310,7 +310,7 @@ public class KittenUtils2 {
 			finalCommand = "echo '" + finalCommand + "' 1>> <LOG_DIR>/stdout 2>><LOG_DIR>/stderr ; "  + finalCommand;
 		
 		final String finalCmd = finalCommandPrefix() + finalCommand + finalCommandSuffix() + " exit \\\\${EXIT}; ";
-		printContainer(jt_id, finalCmd, w, prefix, extraEnv, nr);
+		printContainer(logSuffix, finalCmd, w, prefix, extraEnv, nr);
 	}
 	
 	protected String finalCommandPrefix()

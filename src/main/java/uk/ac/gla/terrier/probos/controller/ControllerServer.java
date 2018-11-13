@@ -559,7 +559,10 @@ public class ControllerServer extends AbstractService implements PBSClient {
 		int newId = nextJobId.incrementAndGet();
 		JobInformation ji = new JobInformation(newId, job);
 		jobArray.put(newId, ji);
-		ji.jobId = newId;
+		
+		//#6: Master-generated logfiles do not record the jobid
+		job.setOutput_Path(job.getOutput_Path().replaceAll("\\$\\{PBS_JOBID\\}", String.valueOf(newId)));
+		job.setError_Path(job.getError_Path().replaceAll("\\$\\{PBS_JOBID\\}", String.valueOf(newId)));
 		ji.modify();
 		user2QueuedCount.adjustOrPutValue(requestorUserName, 1, 1);
 		if (! storeJobScript(ji, requestorUserName, scriptSource))

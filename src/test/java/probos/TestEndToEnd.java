@@ -117,8 +117,8 @@ public class TestEndToEnd {
 			pw.close();
 			
 			PBSJob j = js[i-1] = qs.createJob(new String[]{"-N", "testHostname", job.toString()});
-			String stdOut = j.getOutput_Path() + String.valueOf(i);
-			String stdErr = j.getError_Path() + String.valueOf(i);
+			String stdOut = j.getOutput_Path().replaceAll("\\$\\{PBS_JOBID\\}", String.valueOf(i));
+			String stdErr = j.getError_Path().replaceAll("\\$\\{PBS_JOBID\\}", String.valueOf(i));
 			new File(stdOut.split(":")[1]).delete();
 			new File(stdErr.split(":")[1]).delete();
 			assertNotExists(stdOut);
@@ -149,8 +149,8 @@ public class TestEndToEnd {
 		for(int i=1;i<=n;i++)
 		{
 			PBSJob j = js[i-1];
-			String stdOut = j.getOutput_Path() + String.valueOf(i);
-			String stdErr = j.getError_Path() + String.valueOf(i);
+			String stdOut = j.getOutput_Path().replaceAll("\\$\\{PBS_JOBID\\}", String.valueOf(i));
+			String stdErr = j.getError_Path().replaceAll("\\$\\{PBS_JOBID\\}", String.valueOf(i));
 			assertExists(stdOut);
 			assertExists(stdErr);
 			String[] lines = Utils.slurpString(new File(stdOut.split(":")[1]));
@@ -230,8 +230,8 @@ public class TestEndToEnd {
 			assertNotNull(tmpInitDir.toString());
 			PBSJob j = qs.createJob(new String[]{"-N", name, "-d", tmpInitDir.toString(), job.toString()});
 			
-			String stdOut = j.getOutput_Path() + String.valueOf(i);
-			String stdErr = j.getError_Path() + String.valueOf(i);
+			String stdOut = j.getOutput_Path().replaceAll("\\$\\{PBS_JOBID\\}", String.valueOf(i));
+			String stdErr = j.getError_Path().replaceAll("\\$\\{PBS_JOBID\\}", String.valueOf(i));
 			new File(stdOut.split(":")[1]).delete();
 			new File(stdErr.split(":")[1]).delete();
 			assertNotExists(stdOut);
@@ -366,8 +366,8 @@ public class TestEndToEnd {
 		
 		for(int ar_id : new int[]{1,2,3,4,5})
 		{
-			String stdOut = j.getOutput_Path() + String.valueOf(1) + "-" + ar_id;
-			String stdErr = j.getError_Path() + String.valueOf(1) + "-" + ar_id;
+			String stdOut = j.getOutput_Path().replaceAll("\\$\\{PBS_JOBID\\}", String.valueOf(1)) + "-" + ar_id;
+			String stdErr = j.getError_Path().replaceAll("\\$\\{PBS_JOBID\\}", String.valueOf(1)) + "-" + ar_id;
 			new File(stdOut.split(":")[1]).delete();
 			new File(stdErr.split(":")[1]).delete();
 			assertFalse(new File(stdOut).exists());
@@ -395,8 +395,8 @@ public class TestEndToEnd {
 		
 		for(int ar_id : new int[]{1,2,3,4,5})
 		{
-			String stdOut = j.getOutput_Path() + String.valueOf(1) + "-" + ar_id;
-			String stdErr = j.getError_Path() + String.valueOf(1) + "-" + ar_id;
+			String stdOut = j.getOutput_Path().replaceAll("\\$\\{PBS_JOBID\\}", String.valueOf(1)) + "-" + ar_id;
+			String stdErr = j.getError_Path().replaceAll("\\$\\{PBS_JOBID\\}", String.valueOf(1)) + "-" + ar_id;
 			assertExists(stdOut);
 			assertExists(stdErr);
 			new File(stdOut).delete();

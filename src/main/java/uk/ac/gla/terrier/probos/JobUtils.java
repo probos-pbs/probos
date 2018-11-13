@@ -365,7 +365,7 @@ public class JobUtils {
 		//resolve to hostnames if necessary
 		if (job.getOutput_Path() == null)
 		{
-			job.setOutput_Path(hostname + ":" + cwd + File.separatorChar + job_Name + ".o");
+			job.setOutput_Path(hostname + ":" + cwd + File.separatorChar + job_Name + ".o" + "${PBS_JOBID}");
 		}
 		else
 		{
@@ -373,7 +373,7 @@ public class JobUtils {
 		}
 		if (job.getError_Path() == null)
 		{
-			job.setError_Path(hostname + ":" + cwd + File.separatorChar + job_Name + ".e");
+			job.setError_Path(hostname + ":" + cwd + File.separatorChar + job_Name + ".e" + "${PBS_JOBID}");
 		}
 		else
 		{
