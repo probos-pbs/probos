@@ -25,6 +25,7 @@ import uk.ac.gla.terrier.probos.PConfiguration;
 import com.cloudera.kitten.appmaster.ApplicationMasterParameters;
 import com.cloudera.kitten.appmaster.ApplicationMasterService;
 import com.cloudera.kitten.appmaster.params.lua.LuaApplicationMasterParameters;
+import com.cloudera.kitten.lua.LuaFields;
 
 public class ProbosApplicationMaster extends Configured implements Tool {
 
@@ -52,6 +53,12 @@ public class ProbosApplicationMaster extends Configured implements Tool {
 				break;
 			}
 		}
+		if (! System.getenv().containsKey(LuaFields.KITTEN_JOB_NAME))
+		{
+			System.err.println("Env var " + LuaFields.KITTEN_JOB_NAME + " is missing");
+			return 2;
+		}
+		
 	    ApplicationMasterParameters params = new LuaApplicationMasterParameters(getConf());
 	    ApplicationMasterService service;
 	    if (dib)
