@@ -5,6 +5,11 @@ use Cwd;
 use File::Basename;
 my $QSUB = dirname($0).'/qsub';
 $ENV{TERMCAP}='';
+
+#PATH correction
+my %PATH = map {$_ => 1} split(/:/, $ENV{PATH});
+$ENV{PATH} = $ENV{PATH} . ":/bin" unless exists $PATH{"/bin"};
+
 my $default_walltime = "01:00:00";
 
 my $ARGS = join ' ', ' ', @ARGV;
