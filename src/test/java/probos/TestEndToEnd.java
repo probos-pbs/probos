@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -61,6 +62,10 @@ public class TestEndToEnd {
 	File probosJobDir = null;
 	
 	@Before public void setupCluster() throws Exception {
+		
+		assertTrue("Please ensure HADOOP_HOME is set before running this unit test", System.getenv().containsKey("HADOOP_HOME"));
+		assertExists(System.getenv().get("HADOOP_HOME") + "/bin/hadoop");
+
 		//System.getenv().put("HADOOP_HOME", "/Users/craigm/Downloads/hadoop-2.6.0/");
 		System.setProperty("probos.home", System.getProperty("user.dir"));
 		(probosJobDir = new File(System.getProperty("user.dir"),"probos")).mkdir();
@@ -194,7 +199,7 @@ public class TestEndToEnd {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintStream stdout = new PrintStream( baos );
 		int rtr = qs.waitForInteractive(jobid, 
-				IOUtils.toInputStream("echo \""+testLine+"\"; exit"), 
+				IOUtils.toInputStream("echo \""+testLine+"\"; exit", Charset.defaultCharset()), 
 				stdout, System.err, 60000);
 		stdout.close();
 		assertEquals(0,rtr);
