@@ -34,7 +34,7 @@ public class Constants {
 	
 	public static final String PACKAGED_KITTEN_JAR_ON_SERVER = 
 			System.getProperty("probos.kitten.master.jar", 
-			new File(PROBOS_HOME, "lib/kitten-master-0.3.0-jar-with-dependencies.jar").getAbsolutePath());
+			new File(PROBOS_HOME, "lib/kitten-master-"+Version.KITTEN_VERSION+"-jar-with-dependencies.jar").getAbsolutePath());
 	public static final String PACKAGED_PROBOS_JAR_ON_SERVER = 
 			System.getProperty("probos.probos.master.jar", 
 			new File(PROBOS_HOME, "target/"+PRODUCT_NAME+"-"
