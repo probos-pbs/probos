@@ -48,6 +48,7 @@ public class ProbosApplicationMasterDistributedServiceImpl extends
 			throws Exception {
 		super(parameters, _conf);
 		
+		this.handler = new DistributedProbosAMRMClientCallbackHandler();
 		if (System.getenv("PBS_SISTER_COUNT") == null)
 		{
 			throw new IllegalArgumentException("Env invalid: PBS_SISTER_COUNT not found");
@@ -57,14 +58,19 @@ public class ProbosApplicationMasterDistributedServiceImpl extends
 		superiorLatch = new CountDownLatch(requiredSisterCount);
 	}
 	
-	@Override
-	public void onContainersAllocated(List<Container> allocatedContainers) {
-		for(Container c : allocatedContainers)
-		{
-			allocatedNodes.add(c.getNodeId());
+	class DistributedProbosAMRMClientCallbackHandler extends ProbosAMRMClientCallbackHandler
+	{
+		@Override
+		public void onContainersAllocated(List<Container> allocatedContainers) {
+			for(Container c : allocatedContainers)
+			{
+				allocatedNodes.add(c.getNodeId());
+			}
+			super.onContainersAllocated(allocatedContainers);
 		}
-		super.onContainersAllocated(allocatedContainers);
 	}
+	
+	
 
 	@Override
 	protected ContainerTracker getTracker(ContainerLaunchParameters clp) {

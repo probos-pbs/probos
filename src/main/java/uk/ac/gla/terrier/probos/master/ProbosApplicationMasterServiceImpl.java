@@ -82,10 +82,43 @@ public class ProbosApplicationMasterServiceImpl extends ApplicationMasterService
 	long lastHeartbeat = 0;
 	final TIntObjectHashMap<ContainerId> arrayId2ContainerId = new TIntObjectHashMap<ContainerId>();
 	
+	protected class ProbosAMRMClientCallbackHandler extends AMRMClientCallbackHandler {
+		
+		@Override
+		public void onShutdownRequest() {
+			webServer.stop();
+			RPC.stopProxy(masterClient);
+			super.onShutdownRequest();
+		}
+		
+		@Override
+		public void onContainersCompleted(List<ContainerStatus> containerList) {
+			super.onContainersCompleted(containerList);
+			
+			//?*HACK*?
+			//for some reason, we don't observe onContainerStopped() being called 
+			//until the end of the application, but onContainersCompleted() being
+			//called as expected. Hence, we map these through to help the Controller
+			//observe array task completions
+			
+			for(ContainerStatus status : containerList) {
+				ContainerId cid = status.getContainerId();
+				for (ContainerTracker tracker : trackers) {
+					if (tracker.owns(cid))
+						if (tracker instanceof ProbosContainerTracker)
+							((ProbosContainerTracker)tracker).onContainerStopped(status);
+						else
+							tracker.onContainerStopped(cid);
+				}
+			}
+		}
+	}
+	
 	@SuppressWarnings("unchecked")
 	public ProbosApplicationMasterServiceImpl(
 			ApplicationMasterParameters parameters, Configuration _conf) throws Exception {
 		super(parameters, _conf);
+		this.handler = new ProbosAMRMClientCallbackHandler();
 		jobId = Integer.parseInt(System.getenv("PBS_JOBID"));
 		LOG.info("Starting " + this.getClass().getSimpleName() + " on "+ Utils.getHostname()  + " for job " + jobId);
 
@@ -169,12 +202,7 @@ public class ProbosApplicationMasterServiceImpl extends ApplicationMasterService
 		super.runOneIteration();
 	}
 
-	@Override
-	public void onShutdownRequest() {
-		webServer.stop();
-		RPC.stopProxy(masterClient);
-		super.onShutdownRequest();
-	}
+	
 	
 	public Configuration getConf()
 	{
@@ -196,32 +224,14 @@ public class ProbosApplicationMasterServiceImpl extends ApplicationMasterService
 		return arrayId2ContainerId;
 	}
 	
+	public float getProgress() {
+		return handler.getProgress();
+	}
+	
 	protected ContainerTracker getTracker(ContainerLaunchParameters clp) {
 		if (clp.getEnvironment().get("PBS_ARRAYID") != null)
 			return new ProbosArrayContainerTracker(clp);
 		return new ProbosNormalContainerTracker(clp);
-	}
-	
-	@Override
-	public void onContainersCompleted(List<ContainerStatus> containerList) {
-		super.onContainersCompleted(containerList);
-		
-		//?*HACK*?
-		//for some reason, we don't observe onContainerStopped() being called 
-		//until the end of the application, but onContainersCompleted() being
-		//called as expected. Hence, we map these through to help the Controller
-		//observe array task completions
-		
-		for(ContainerStatus status : containerList) {
-			ContainerId cid = status.getContainerId();
-			for (ContainerTracker tracker : trackers) {
-				if (tracker.owns(cid))
-					if (tracker instanceof ProbosContainerTracker)
-						((ProbosContainerTracker)tracker).onContainerStopped(status);
-					else
-						tracker.onContainerStopped(cid);
-			}
-		}
 	}
 
 	@Override
