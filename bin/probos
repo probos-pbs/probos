@@ -14,6 +14,13 @@ do
 done
 BIN_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
+if [[ :$PATH: == *:"/bin":* ]] ; then
+	echo -n ""
+else
+	PATH="$PATH:/bin"
+fi
+
+
 JAR=probos-*.jar
 
 if [ "$PROBOS_CONF_DIR" == "" ];
