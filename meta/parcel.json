@@ -1,31 +1,31 @@
 {
   "schema_version": 1,
   "name": "ProBoS",
-  "version": "0.2.15-SNAPSHOT",
+  "version": "0.3.0-SNAPSHOT",
   "setActiveSymlink": true,
   "depends": "CDH",
   "conflicts": "",
-  
+
   "provides" : [ "probos" ],
-  
+
    "packages": [
     { "name":    "ProBoS",
-      "version": "0.2.15-SNAPSHOT"
+      "version": "0.3.0-SNAPSHOT"
     }
    ],
-   
+
    "scripts": {
     "defines": "probos_env.sh"
   },
-   
+
    "components": [
     { "name":     "ProBoS",
-      "version":  "0.2.15-SNAPSHOT",
-      "pkg_version":  "0.2.15-SNAPSHOT",
-      "pkg_release": "0.2.15-SNAPSHOT"
+      "version":  "0.3.0-SNAPSHOT",
+      "pkg_version":  "0.3.0-SNAPSHOT",
+      "pkg_release": "0.3.0-SNAPSHOT"
     }
    ],
-  
+
   "users": {
     "probos": {
       "longname"    : "ProBoS daemon",
