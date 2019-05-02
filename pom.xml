@@ -14,6 +14,8 @@
 		<slf4j.version>1.7.14</slf4j.version>
 		<logback.version>1.0.1</logback.version>
 		<metrics.version>3.1.0</metrics.version>
+		<hadoop.version>3.1.2</hadoop.version>
+		<kitten.version>0.4.0</kitten.version>
 	</properties>
 
 	<repositories>
@@ -42,7 +44,7 @@
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-common</artifactId>
-			<version>3.0.1</version>
+			<version>${hadoop.version}</version>
 			<scope>provided</scope>
 
 			<exclusions>
@@ -69,7 +71,7 @@
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-yarn-client</artifactId>
-			<version>3.0.1</version>
+			<version>${hadoop.version}</version>
 			<scope>provided</scope>
 			<exclusions>
 				<exclusion>
@@ -82,21 +84,21 @@
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-yarn-server-tests</artifactId>
-			<version>3.0.1</version>
+			<version>${hadoop.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-yarn-api</artifactId>
-			<version>3.0.1</version>
+			<version>${hadoop.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-yarn-server-common</artifactId>
-			<version>3.0.1</version>
+			<version>${hadoop.version}</version>
 			<scope>provided</scope>
 
 		</dependency>
@@ -104,7 +106,7 @@
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-yarn-server-resourcemanager</artifactId>
-			<version>3.0.1</version>
+			<version>${hadoop.version}</version>
 			<scope>provided</scope>
 			<exclusions>
 				<exclusion>
@@ -117,7 +119,7 @@
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-yarn-server-nodemanager</artifactId>
-			<version>3.0.1</version>
+			<version>${hadoop.version}</version>
 			<scope>provided</scope>
 			<exclusions>
 				<exclusion>
@@ -130,7 +132,7 @@
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-minicluster</artifactId>
-			<version>3.0.1</version>
+			<version>${hadoop.version}</version>
 			<scope>provided</scope>
 			<exclusions>
 				<exclusion>
@@ -246,10 +248,6 @@
 		</dependency>
 
 	</dependencies>
-	<!-- <dependencyManagement> <dependencies> <dependency> <groupId>commons-httpclient</groupId> 
-		<artifactId>commons-httpclient</artifactId> <scope>compile</scope> <version>3.1.0</version> 
-		<systemPath>/Users/craigm/Downloads/hadoop-2.6.0/share/hadoop/tools/lib/commons-httpclient-3.1.jar</systemPath> 
-		</dependency> </dependencies> </dependencyManagement> -->
 	<build>
 
 		<resources>
