@@ -86,7 +86,8 @@ public class ProbosApplicationMasterServiceImpl extends ApplicationMasterService
 	public ProbosApplicationMasterServiceImpl(
 			ApplicationMasterParameters parameters, Configuration _conf) throws Exception {
 		super(parameters, _conf);
-		LOG.info("Starting " + this.getClass().getSimpleName() + " on "+ Utils.getHostname());
+		jobId = Integer.parseInt(System.getenv("PBS_JOBID"));
+		LOG.info("Starting " + this.getClass().getSimpleName() + " on "+ Utils.getHostname()  + " for job " + jobId);
 
 		Credentials credentials = UserGroupInformation.getCurrentUser().getCredentials();
 		probosTokens = new ArrayList<Token<ProbosDelegationTokenIdentifier>>();
@@ -127,7 +128,7 @@ public class ProbosApplicationMasterServiceImpl extends ApplicationMasterService
 		controllerClient = PBSClientFactory.getPBSClient();
 		LOG.info("Connected to controller " + hostPort);
 		
-		jobId = Integer.parseInt(System.getenv("PBS_JOBID"));
+		
 		container = System.getenv("CONTAINER_ID");
 		masterClient.jobEvent(jobId, EventType.MASTER_START, container, null);		
 		

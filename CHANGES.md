@@ -1,5 +1,11 @@
 # Changes
 
+ * #10 Job names and outputs files are truncated
+ * #9 Showing a job in state R if no tasks are running is misleading
+ * #8 submit_args is not set by qsub
+ * #6 Master-generated logfiles do not record the jobid.
+ * #5 parse mem requirements with suffices, e.g. mem=1g
+
 v0.2.15 - February 2018
  * #3 HOME should be set, XDG_RUNTIME_DIR should not be set.
  * #4 CLASSPATH should not be set by default

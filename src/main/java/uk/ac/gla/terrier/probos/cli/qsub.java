@@ -257,8 +257,8 @@ public class qsub extends Configured implements Tool {
 				if (line.startsWith(directivePrefix + " "))
 				{
 					String[] lineargs = line.replaceFirst("^" + directivePrefix + " ", "").split(" ");
-					CommandLine cmdLine = JobUtils.parseJobSubmission(lineargs);
-					JobUtils.parseArgs(cmdLine, job);
+					CommandLine jobCmdLine = JobUtils.parseJobSubmission(lineargs);
+					JobUtils.parseArgs(jobCmdLine, job);
 				}
 				//Scanning will continue until the first executable line, that is a 
 				//line that is not blank, not a directive line, nor a line whose first 
@@ -271,7 +271,7 @@ public class qsub extends Configured implements Tool {
 		}
 		//commandline arguments overrule 
 		JobUtils.parseArgs(cmd, job);
-
+		job.setSubmit_args(_args);
 		
 		job.setCommand(new File(jobFilename).getCanonicalPath());
 		JobUtils.finaliseJob(job);

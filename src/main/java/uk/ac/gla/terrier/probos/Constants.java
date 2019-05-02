@@ -43,4 +43,16 @@ public class Constants {
 	
 	public static final String[] ARGS_HELP_OPTIONS = new String[]{"h", "help", "?"};
 	public static final String ARGS_HELP_MESSAGE = "Prints this help message";
+	
+	public static void constantsVerification()
+	{
+		if (! new File(PACKAGED_KITTEN_JAR_ON_SERVER).exists())
+			throw new Error(PACKAGED_KITTEN_JAR_ON_SERVER  + " does not exist");
+		if (! new File(PACKAGED_PROBOS_JAR_ON_SERVER).exists())
+			throw new Error(PACKAGED_PROBOS_JAR_ON_SERVER  + " does not exist");
+		if (! new File(HADOOP_HOME).exists())
+			throw new Error(HADOOP_HOME  + " does not exist");
+		if (! new File(PROBOS_HOME).exists())
+			throw new Error(PROBOS_HOME  + " does not exist");
+	}
 }

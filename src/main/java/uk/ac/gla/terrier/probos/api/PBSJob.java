@@ -216,6 +216,10 @@ public class PBSJob implements Writable {
 		return submit_args;
 	}
 	
+	public void setSubmit_args(String[] args) {
+		submit_args = args;
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void readFields(DataInput in) throws IOException {

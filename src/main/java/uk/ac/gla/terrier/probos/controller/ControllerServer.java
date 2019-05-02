@@ -294,6 +294,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 	
 	public ControllerServer(Configuration _hconf) throws IOException
 	{
+		Constants.constantsVerification();
 		this.yConf = new YarnConfiguration(_hconf);
 		yConf.addResource("yarn-site.xml");
 		UserGroupInformation.setConfiguration(yConf);
@@ -558,7 +559,10 @@ public class ControllerServer extends AbstractService implements PBSClient {
 		int newId = nextJobId.incrementAndGet();
 		JobInformation ji = new JobInformation(newId, job);
 		jobArray.put(newId, ji);
-		ji.jobId = newId;
+		
+		//#6: Master-generated logfiles do not record the jobid
+		job.setOutput_Path(job.getOutput_Path().replaceAll("\\$\\{PBS_JOBID\\}", String.valueOf(newId)));
+		job.setError_Path(job.getError_Path().replaceAll("\\$\\{PBS_JOBID\\}", String.valueOf(newId)));
 		ji.modify();
 		user2QueuedCount.adjustOrPutValue(requestorUserName, 1, 1);
 		if (! storeJobScript(ji, requestorUserName, scriptSource))
@@ -898,14 +902,15 @@ public class ControllerServer extends AbstractService implements PBSClient {
 					state = 'E';
 					break;
 				case RUNNING:
-					state = 'R';
+					state = appReport.getApplicationResourceUsageReport().getNumUsedContainers() > 1
+							? 'R' //running
+							: 'S'; //at least a master container has started - so "Started"/"Suspended"
 					break;
 				default:
 					state = '?';
 					break;				
 				}
 		}
-		
 		String timeUse = appReport == null
 				? "0"
 				: Utils.makeTime( appReport.getApplicationResourceUsageReport().getVcoreSeconds() );
@@ -1138,12 +1143,15 @@ public class ControllerServer extends AbstractService implements PBSClient {
 							node2job.put(hostname, jobs = new TIntArrayList());
 						jobs.add(jobId);
 					} catch (Exception e) {
-						throw new RuntimeException(e);
+						LOG.warn("Could not getContainerReport", e);
 					}					
 				}
 				return true;
 			}
 		});
+//		System.err.println(job2con);
+//		System.err.println(node2job);
+		
 		
 		List<NodeReport> nodeReports = yClient.getNodeReports();
 		Collections.sort(nodeReports, new Comparator<NodeReport>()
@@ -1171,7 +1179,6 @@ public class ControllerServer extends AbstractService implements PBSClient {
 				jobs = new int[0];
 			else
 				jobs = jobList.toArray();
-			
 			String state = "free";
 			if (numContainers >= numProcs)
 				state = "busy";

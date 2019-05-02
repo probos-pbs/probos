@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.server.MiniYARNCluster;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.ResourceScheduler;
@@ -46,7 +47,9 @@ import org.junit.Test;
 import uk.ac.gla.terrier.probos.JobUtils;
 import uk.ac.gla.terrier.probos.Utils;
 import uk.ac.gla.terrier.probos.api.PBSJob;
+import uk.ac.gla.terrier.probos.api.PBSJobStatusFat;
 import uk.ac.gla.terrier.probos.api.PBSJobStatusInteractive;
+import uk.ac.gla.terrier.probos.api.PBSJobStatusLight;
 import uk.ac.gla.terrier.probos.cli.pbsnodes;
 import uk.ac.gla.terrier.probos.cli.qpeek;
 import uk.ac.gla.terrier.probos.cli.qstat;
@@ -121,8 +124,8 @@ public class TestEndToEnd {
 			pw.close();
 			
 			PBSJob j = js[i-1] = qs.createJob(new String[]{"-N", "testHostname", job.toString()});
-			String stdOut = j.getOutput_Path() + String.valueOf(i);
-			String stdErr = j.getError_Path() + String.valueOf(i);
+			String stdOut = j.getOutput_Path().replaceAll("\\$\\{PBS_JOBID\\}", String.valueOf(i));
+			String stdErr = j.getError_Path().replaceAll("\\$\\{PBS_JOBID\\}", String.valueOf(i));
 			new File(stdOut.split(":")[1]).delete();
 			new File(stdErr.split(":")[1]).delete();
 			assertNotExists(stdOut);
@@ -153,8 +156,8 @@ public class TestEndToEnd {
 		for(int i=1;i<=n;i++)
 		{
 			PBSJob j = js[i-1];
-			String stdOut = j.getOutput_Path() + String.valueOf(i);
-			String stdErr = j.getError_Path() + String.valueOf(i);
+			String stdOut = j.getOutput_Path().replaceAll("\\$\\{PBS_JOBID\\}", String.valueOf(i));
+			String stdErr = j.getError_Path().replaceAll("\\$\\{PBS_JOBID\\}", String.valueOf(i));
 			assertExists(stdOut);
 			assertExists(stdErr);
 			String[] lines = Utils.slurpString(new File(stdOut.split(":")[1]));
@@ -219,6 +222,7 @@ public class TestEndToEnd {
 		
 		for(int i=1;i<=n;i++)
 		{
+			String name = "testEnv" + "-1234567890-" + i; //check longer than 17
 			File job = File.createTempFile("test", ".sh");
 			PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(job)));
 			pw.println("#!/bin/bash");
@@ -231,10 +235,10 @@ public class TestEndToEnd {
 			tmpInitDir.delete();
 			tmpInitDir.mkdir();
 			assertNotNull(tmpInitDir.toString());
-			PBSJob j = qs.createJob(new String[]{"-N", "testEnv", "-d", tmpInitDir.toString(), job.toString()});
+			PBSJob j = qs.createJob(new String[]{"-N", name, "-d", tmpInitDir.toString(), job.toString()});
 			
-			String stdOut = j.getOutput_Path() + String.valueOf(i);
-			String stdErr = j.getError_Path() + String.valueOf(i);
+			String stdOut = j.getOutput_Path().replaceAll("\\$\\{PBS_JOBID\\}", String.valueOf(i));
+			String stdErr = j.getError_Path().replaceAll("\\$\\{PBS_JOBID\\}", String.valueOf(i));
 			new File(stdOut.split(":")[1]).delete();
 			new File(stdErr.split(":")[1]).delete();
 			assertNotExists(stdOut);
@@ -242,7 +246,6 @@ public class TestEndToEnd {
 			
 			
 			int jobid = qs.submitJob(j);
-			assertEquals(i, jobid);
 			new qstat().run(new String[]{"-n"});
 			Thread.sleep(1000);
 			while(true)
@@ -251,10 +254,24 @@ public class TestEndToEnd {
 				TIntHashSet jobids = new TIntHashSet(qs.c.getJobs());
 				if (jobids.contains(jobid))
 				{
-					char state = qs.c.getJobStatus(jobid, 0).getState();
+					PBSJobStatusLight jobStatus = qs.c.getJobStatus(jobid, 0);
+					char state = jobStatus.getState();
+					
+					assertEquals(name, jobStatus.getJob_Name());
+					
 					System.err.println(jobid + " " + state);
 					if (state == 'R')
+					{
+						System.err.println("QPEEK");
 						new qpeek().run(new String[]{String.valueOf(jobid)});
+						System.err.println("PBSNODES");
+						new pbsnodes(qs.c, System.err).run(new String[0]);
+					}
+					
+					PBSJobStatusFat fatStatus = (PBSJobStatusFat) qs.c.getJobStatus(jobid, 2);
+					String argLine = StringUtils.join(fatStatus.getJob().getSubmit_args(), " ");
+					assertTrue(argLine.contains("-N " + name));
+					
 				}
 				else
 				{
@@ -363,8 +380,8 @@ public class TestEndToEnd {
 		
 		for(int ar_id : new int[]{1,2,3,4,5})
 		{
-			String stdOut = j.getOutput_Path() + String.valueOf(1) + "-" + ar_id;
-			String stdErr = j.getError_Path() + String.valueOf(1) + "-" + ar_id;
+			String stdOut = j.getOutput_Path().replaceAll("\\$\\{PBS_JOBID\\}", String.valueOf(1)) + "-" + ar_id;
+			String stdErr = j.getError_Path().replaceAll("\\$\\{PBS_JOBID\\}", String.valueOf(1)) + "-" + ar_id;
 			new File(stdOut.split(":")[1]).delete();
 			new File(stdErr.split(":")[1]).delete();
 			assertFalse(new File(stdOut).exists());
@@ -392,8 +409,8 @@ public class TestEndToEnd {
 		
 		for(int ar_id : new int[]{1,2,3,4,5})
 		{
-			String stdOut = j.getOutput_Path() + String.valueOf(1) + "-" + ar_id;
-			String stdErr = j.getError_Path() + String.valueOf(1) + "-" + ar_id;
+			String stdOut = j.getOutput_Path().replaceAll("\\$\\{PBS_JOBID\\}", String.valueOf(1)) + "-" + ar_id;
+			String stdErr = j.getError_Path().replaceAll("\\$\\{PBS_JOBID\\}", String.valueOf(1)) + "-" + ar_id;
 			assertExists(stdOut);
 			assertExists(stdErr);
 			new File(stdOut).delete();
