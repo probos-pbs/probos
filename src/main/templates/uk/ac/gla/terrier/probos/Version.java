@@ -22,6 +22,7 @@ public class Version {
 
 	public static String VERSION = "${project.version}";
 	public static String BUILD_TIME = "${timestamp}";
+	public static String KITTEN_VERSION = "${kitten.version}";
 
 	public static void main(String[] args) {
 		System.out.println(VERSION);
