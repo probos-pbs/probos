@@ -229,6 +229,7 @@ public class KittenUtils2 {
 		//Resource capability = JobUtils.getResources(job, pConf);
 		w.println(prefix + "cores = " + String.valueOf(thisNode.corePerNode) + ",");
 		w.println(prefix + "memory = " + String.valueOf(thisNode.memory) + ",");
+		w.println(prefix + "gpus = " + String.valueOf(thisNode.gpus) + ",");
 		
 		//node_label
 		printNodeLabels(prefix, w, thisNode.labels);
@@ -242,6 +243,7 @@ public class KittenUtils2 {
 		w.print(prefix + "env = job_env");
 		w.println(" {");
 		w.println(prefix + " PBS_CORES = \""+ String.valueOf(thisNode.corePerNode) + "\",");
+		w.println(prefix + " PBS_GPUS = \""+ String.valueOf(thisNode.gpus) + "\",");	
 		w.println(prefix + " PBS_VMEM = \""+ String.valueOf(thisNode.memory) + "\",");
 		for(String k : extraEnv.keySet())
 		{
@@ -369,17 +371,20 @@ public class KittenUtils2 {
 
 	static Pattern MEMCOUNT = Pattern.compile("^mem=(\\d+)$");
 	static Pattern PPNCOUNT = Pattern.compile("^ppn=(\\d+)$");
+	static Pattern GPUCOUNT = Pattern.compile("^gpus=(\\d+)$");
 	static Pattern COUNT = Pattern.compile("^\\d+");	
 	
 	/** Represents how a job requests a node */
 	static class NodeRequest {
 		int corePerNode;
 		int memory;
+		int gpus;
 		String[] labels;
 		
-		NodeRequest(int ppn, int mem, String[] reqLabels) {
+		NodeRequest(int ppn, int mem, int gpus, String[] reqLabels) {
 			this.corePerNode = ppn;
 			this.memory = mem;
+			this.gpus = gpus;
 			this.labels = reqLabels;
 		}
 	}
@@ -391,8 +396,8 @@ public class KittenUtils2 {
 		
 		String hostname;
 		
-		SingleNodeRequest(int ppn, int mem, String[] reqLabels, String host) {
-			super(ppn, mem, reqLabels);
+		SingleNodeRequest(int ppn, int mem, int gpus, String[] reqLabels, String host) {
+			super(ppn, mem, gpus, reqLabels);
 			this.hostname = host;
 		}		
 	}
@@ -403,8 +408,8 @@ public class KittenUtils2 {
 		
 		int count;
 		
-		MultiNodeRequest(int ppn, int mem, String[] reqLabels, int number) {
-			super(ppn, mem, reqLabels);
+		MultiNodeRequest(int ppn, int mem, int gpus, String[] reqLabels, int number) {
+			super(ppn, mem, gpus, reqLabels);
 			this.count = number;
 		}
 		
@@ -420,12 +425,13 @@ public class KittenUtils2 {
 	protected static int parseNodeResourceList(PBSJob job,
 			List<NodeRequest> requestList) {
 		int DEFAULT_MEM = 512;
+		int DEFAULT_GPUS = 0;
 		int totalNodeCount = 0;
 		String nodesExpression =  job.getResource_List().get("nodes");
 		//no nodes statement, return default
 		if (nodesExpression == null)
 		{
-			requestList.add(new NodeRequest(1, DEFAULT_MEM, null));
+			requestList.add(new NodeRequest(1, DEFAULT_MEM, DEFAULT_GPUS, null));
 			return 1;
 		}
 		String[] eachNodeRequest = nodesExpression.split("\\+");
@@ -434,6 +440,7 @@ public class KittenUtils2 {
 			final String[] requestPortions = request.split(":");
 			int nodeCount = 1;
 			int mem = DEFAULT_MEM;
+			int gpus = DEFAULT_GPUS;
 			List<String> labels = Lists.newArrayList();
 			String nodeName = null;
 			int ppn = 1;
@@ -452,6 +459,10 @@ public class KittenUtils2 {
 				{
 					mem = Integer.parseInt(m.group(1));
 				}
+				else if ( (m = GPUCOUNT.matcher(portion)).matches() )
+				{
+					gpus = Integer.parseInt(m.group(1));
+				}
 				else if (isNode(portion))
 				{
 					nodeName = portion;
@@ -469,15 +480,15 @@ public class KittenUtils2 {
 			NodeRequest spec;
 			if (nodeCount > 1)
 			{
-				spec = new MultiNodeRequest(ppn, mem, labels.toArray(new String[0]), nodeCount);
+				spec = new MultiNodeRequest(ppn, mem, gpus, labels.toArray(new String[0]), nodeCount);
 			}
 			else if (nodeName != null) 
 			{
-				spec = new SingleNodeRequest(ppn, mem, labels.toArray(new String[0]), nodeName);
+				spec = new SingleNodeRequest(ppn, mem, gpus, labels.toArray(new String[0]), nodeName);
 			}
 			else
 			{
-				spec = new NodeRequest(ppn, mem, labels.toArray(new String[0]));
+				spec = new NodeRequest(ppn, mem, gpus, labels.toArray(new String[0]));
 			}
 			requestList.add(spec);
 			totalNodeCount += nodeCount;
