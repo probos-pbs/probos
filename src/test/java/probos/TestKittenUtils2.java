@@ -30,6 +30,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.LocalResource;
 import org.apache.hadoop.yarn.api.records.Resource;
+import org.apache.hadoop.yarn.api.records.ResourceInformation;
 import org.apache.hadoop.yarn.util.Records;
 import org.junit.Test;
 
@@ -37,6 +38,7 @@ import uk.ac.gla.terrier.probos.Constants;
 import uk.ac.gla.terrier.probos.JobUtils;
 import uk.ac.gla.terrier.probos.PConfiguration;
 import uk.ac.gla.terrier.probos.Utils;
+import uk.ac.gla.terrier.probos.Version;
 import uk.ac.gla.terrier.probos.api.PBSJob;
 import uk.ac.gla.terrier.probos.controller.KittenUtils2;
 
@@ -86,6 +88,8 @@ public class TestKittenUtils2 {
 	@Test
 	public void testLuaSimpleJob() throws Exception {
 		String jobName = "testHostname";
+		assertTrue(new File("target/probos-"+Version.VERSION+".jar").exists());
+		assertTrue(new File("lib/kitten-master-"+Version.KITTEN_VERSION+"-jar-with-dependencies.jar").exists());
 		PBSJob job = UtilsForTest.getSimpleJob(jobName, "hostname");
 		
 		//test the client aspect
@@ -136,6 +140,34 @@ public class TestKittenUtils2 {
 		PBSJob job;
 		job = UtilsForTest.getSimpleJob("testLuaInteractive", "#PBS -I");
 		testJobCompilesClient(job);
+	}
+	
+	//@Test
+	public void testLuaGPUs() throws Exception {
+		PBSJob job;
+		int gpus = 2;
+		job = UtilsForTest.getSimpleJob("testLuaGPU", "#PBS -l nodes=1:gpus=" + gpus);
+		
+		LuaApplicationMasterParameters lamp = testJobCompilesMaster(job);
+		List<ContainerLaunchParameters> clpI = lamp.getContainerLaunchParameters();
+		assertEquals(1, clpI.size());
+		ContainerLaunchParameters clpTask = clpI.get(0);
+		//THIS doesn't work, as we need a resource-type setup with GPUs
+		Resource MAX = Resource.newInstance(Integer.MAX_VALUE, 100, ImmutableMap.of(ResourceInformation.GPU_URI, 3l));
+		Resource r;
+//		MAX.setMemorySize(Integer.MAX_VALUE);
+//		MAX.setVirtualCores(100);
+//		MAX.setResourceValue(ResourceInformation.GPU_URI, 3);
+		r = clpTask.getContainerResource(MAX);
+		assertEquals(gpus, r.getResourceInformation(ResourceInformation.GPU_URI));
+		assertEquals(1, r.getVirtualCores());
+		
+		MAX.setMemorySize(8192);
+		MAX.setVirtualCores(100);
+		r = clpTask.getContainerResource(MAX);
+		assertEquals(8192, r.getMemorySize());
+		assertEquals(1, r.getVirtualCores());
+		
 	}
 	
 	@Test
