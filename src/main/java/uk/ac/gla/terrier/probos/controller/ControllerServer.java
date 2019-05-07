@@ -1224,6 +1224,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 			}
 			matchingJobs.add(jobId);
 		}
+		matchingJobs.sort();
 		return matchingJobs.toArray();
 	}
 
