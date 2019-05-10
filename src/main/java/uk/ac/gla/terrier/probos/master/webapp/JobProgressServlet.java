@@ -50,7 +50,7 @@ public class JobProgressServlet extends BaseServlet {
 			IOException {
 		
 		ps.println("Job id: " + pams.getJobId());
-		ps.println("Progress: " + pams.getProgress());
+		ps.printf("Progress: %02f%%\n", 100f * pams.getProgress());
 		ps.println("Has running containers: "+ pams.hasRunningContainers());
 		ps.println("Requested: " + pams.getTotalRequested());
 		//ps.println("Started: " + pams.g
