@@ -1,5 +1,16 @@
 # Changes
 
+v0.3.1-SNAPSHOT
+ * #15 qstat -f should report Yarn diagnostic report
+ * #16 in qstat -f separate master_host from exec_host
+ * #17 qselect should sort job ids ascending
+ * #18 pbsnodes reproduce more closely Torque's implementation
+
+v0.3.0-SNAPSHOT
+ * #12 support Hadoop 3.x
+ * #13 support GPU resource type
+
+v0.2.16-SNAPSHOT
  * #10 Job names and outputs files are truncated
  * #9 Showing a job in state R if no tasks are running is misleading
  * #8 submit_args is not set by qsub
