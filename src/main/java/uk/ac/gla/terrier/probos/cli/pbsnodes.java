@@ -139,7 +139,7 @@ public class pbsnodes extends Configured implements Tool {
 		String[] strJ = new String[jobs.length];
 		for(int i=0;i<jobs.length;i++)
 			strJ[i] = String.valueOf(jobs[i]);
-		rtr.append("\n\tjobs = "      + StringUtils.join(", ", strJ));
+		rtr.append("\n\tjobs = "      + StringUtils.join(",", strJ));
 		
 		rtr.append("\n\tlabels = "    + StringUtils.join(",", n.getNodeLabels()));
 		rtr.append("\n\track = "      + n.getRack());
