@@ -46,6 +46,7 @@ import javax.servlet.http.HttpServlet;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -920,7 +921,8 @@ public class ControllerServer extends AbstractService implements PBSClient {
 				: appReport.getTrackingUrl();
 		
 		PBSJobStatusLight rtr = null;
-		String nodes = null;
+		String execnodes = null;
+		String masterNode = null;
 		List<ContainerReport> cReports = null;
 		String appId = null;
 		
@@ -980,21 +982,26 @@ public class ControllerServer extends AbstractService implements PBSClient {
 				List<ApplicationAttemptReport> aaids = yClient.getApplicationAttempts(aid);
 				ApplicationAttemptId aaid = aaids.get(aaids.size() -1).getApplicationAttemptId();
 				cReports = yClient.getContainers(aaid);
-				StringBuilder sNodes = new StringBuilder();
+				StringBuilder sExecNodes = new StringBuilder();
 				if (cReports.size() > 0)
 				{
 					for(ContainerReport cReport : cReports)
 					{
 						if (cReport.getContainerState() == ContainerState.RUNNING)
 						{
-							sNodes.append(cReport.getAssignedNode().getHost());
-							sNodes.append("+");
+							if (cReport.getContainerId().toString().equals(ji.masterContainerId)) {
+								masterNode = cReport.getAssignedNode().getHost();
+							} else {
+								sExecNodes.append(cReport.getAssignedNode().getHost());
+								sExecNodes.append('+');
+							}
 						}
 					}
 					//remove trailing ,
-					sNodes.setLength(sNodes.length()-1);
+					if (sExecNodes.length() >= 2)
+						sExecNodes.setLength(sExecNodes.length()-1);
 				}
-				nodes = sNodes.toString();
+				execnodes = sExecNodes.toString();
 			}
 			if (requestType == 1)
 			{
@@ -1006,7 +1013,8 @@ public class ControllerServer extends AbstractService implements PBSClient {
 						state, 
 						job!= null ? job.getQueue() : null,
 						appURL,
-						nodes
+						execnodes,
+						masterNode
 						);
 			}
 			else if (requestType == 2) {
@@ -1032,10 +1040,12 @@ public class ControllerServer extends AbstractService implements PBSClient {
 						timeUse, 
 						state, 
 						job!= null ? job.getQueue() : null,
-						nodes,
+						execnodes,
+						masterNode,
 						ji!= null ? ji.jobSpec : null,
 						ji!= null ? ji.masterContainerId: null,
-						tContainers, trackingURL, appId
+						tContainers, trackingURL, appId,
+						appReport != null ? appReport.getDiagnostics() : null
 						);
 			} else if (requestType == 3) {
 				int[] arrayIds = job != null
@@ -1130,6 +1140,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 		//for each job
 		TIntObjectHashMap<List<ContainerId>> job2con = getAllActiveContainers();
 		final Map<String,TIntArrayList> node2job = new HashMap<String,TIntArrayList>();
+		final Map<String,List<String>> node2users = new HashMap<>();
 		job2con.forEachEntry(new TIntObjectProcedure<List<ContainerId>>() {
 			@Override
 			public boolean execute(int jobId, List<ContainerId> containerList) {
@@ -1137,11 +1148,18 @@ public class ControllerServer extends AbstractService implements PBSClient {
 					try {
 						ContainerReport cr = yClient.getContainerReport(cid);
 						String hostname = cr.getAssignedNode().getHost();
+						String username = jobArray.get(jobId).jobSpec.getEuser();
 						
 						TIntArrayList jobs = node2job.get(hostname);
 						if (jobs == null)
 							node2job.put(hostname, jobs = new TIntArrayList());
+						
+						List<String> users = node2users.get(hostname);
+						if (users == null)
+							node2users.put(hostname, users = new ArrayList<>());
+						
 						jobs.add(jobId);
+						users.add(username);
 					} catch (Exception e) {
 						LOG.warn("Could not getContainerReport", e);
 					}					
@@ -1167,8 +1185,7 @@ public class ControllerServer extends AbstractService implements PBSClient {
 		{
 			final NodeReport node = nodeReports.get(i);
 			String hostname = node.getNodeId().getHost();
-			String yarnState = node.getNodeState().toString();
-			
+			String yarnState = node.getNodeState().toString();			
 			String rack = node.getRackName();
 			String tracker = node.getHttpAddress();
 			int numContainers = node.getNumContainers();
@@ -1179,17 +1196,38 @@ public class ControllerServer extends AbstractService implements PBSClient {
 				jobs = new int[0];
 			else
 				jobs = jobList.toArray();
+			
+			String[] strJ = new String[jobs.length];
+			for(int ji=0;ji<jobs.length;ji++)
+				strJ[ji] = String.valueOf(jobs[ji]);
+			
+			String[] users;
+			List<String> userList = node2users.get(hostname);
+			if (userList == null)
+				users = new String[0];
+			else
+				users = userList.toArray(new String[0]);
+			
 			String state = "free";
 			if (numContainers >= numProcs)
 				state = "busy";
 			
 			StringBuilder status = new StringBuilder();
 			//these emulate the Torque PBS implementation
-			status.append("ncpus=" + numProcs);
-			status.append(",physmem=" + node.getCapability().getMemorySize());
+			status.append("rectime="+ node.getLastHealthReportTime());
+			status.append(",ncpus=" + numProcs);
+			status.append(",physmem=" + 1024l * node.getCapability().getMemorySize() + "kb");
+			status.append(",totmem="+ 1024l * node.getCapability().getMemorySize()  + "kb");
+			status.append(",availmem="+ 1024l * (node.getCapability().getMemorySize() - node.getUsed().getMemorySize()) + "kb");
+			int usercount = users.length;
+			status.append(",nusers="+usercount+ ",nsessions="+usercount);
+			status.append(",sessions="+StringUtils.join(users, ' '));
+			status.append(",jobs="+StringUtils.join(strJ, ' '));
+			
 			//these are our own formatting
 			status.append(",capacity=" + node.getCapability().toString());
 			status.append(",used=" + node.getUsed().toString());
+			
 			
 			rtr[i] = new PBSNodeStatus(
 					hostname, state, status.toString(), jobs,

@@ -24,33 +24,40 @@ import uk.ac.gla.terrier.probos.Utils;
 /** Information about a job for qstat, including the nodes in use */
 public class PBSJobStatusNodes extends PBSJobStatusLight {
 
-	String nodes;
+	String execnodes;
+	String masternode;
 
 	public PBSJobStatusNodes() {
 		super();
 	}
 
 	public PBSJobStatusNodes(int jobId, boolean isArray, String jobName, String jobOwner,
-			String timeUse, char state, String queue, String trackingURL, String nodes) {
+			String timeUse, char state, String queue, String trackingURL, String execnodes, String masternode) {
 		super(jobId, isArray, jobName, jobOwner, timeUse, state, queue, trackingURL);
-		this.nodes = nodes;
+		this.execnodes = execnodes;
+		this.masternode = masternode;
 	}
 	
+	public String getExecutionNodes() {
+		return execnodes;
+	}
 	
-	public String getNodes() {
-		return nodes;
+	public String getMasterNode() {
+		return execnodes;
 	}
 
 	@Override
 	public void readFields(DataInput in) throws IOException {
 		super.readFields(in);
-		nodes = Utils.readStringOrNull(in);
+		masternode = Utils.readStringOrNull(in);
+		execnodes = Utils.readStringOrNull(in);
 	}
 
 	@Override
 	public void write(DataOutput out) throws IOException {
 		super.write(out);
-		Utils.writeStringOrNull(out, nodes);
+		Utils.writeStringOrNull(out, masternode);
+		Utils.writeStringOrNull(out, execnodes);
 	}
 
 }

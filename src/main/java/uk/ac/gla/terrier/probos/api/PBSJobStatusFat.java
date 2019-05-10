@@ -28,18 +28,20 @@ public class PBSJobStatusFat extends PBSJobStatusNodes {
 	String masterContainer = null;
 	String yarnAppId = null;
 	String[] taskContainerIds = null;
+	String diagnosticMsg = null;
 	
 	public PBSJobStatusFat(){}
 	
 	public PBSJobStatusFat(int jobId, boolean isArray, String jobName, String jobOwner,
-			String timeUse, char state, String queue, String nodes, PBSJob job, 
-			String mContainer, String[] tContainers, String trackingURL, String yarnAppId) {
-		super(jobId, isArray, jobName, jobOwner, timeUse, state, queue, trackingURL, nodes);
+			String timeUse, char state, String queue, String execnodes, String masternode, PBSJob job, 
+			String mContainer, String[] tContainers, String trackingURL, String yarnAppId, String diagnosticMsg) {
+		super(jobId, isArray, jobName, jobOwner, timeUse, state, queue, trackingURL, execnodes, masternode);
 		this.job = job;
 		this.masterContainer = mContainer;
 		this.taskContainerIds = tContainers;
 		this.trackingURL = trackingURL;
 		this.yarnAppId = yarnAppId;
+		this.diagnosticMsg = diagnosticMsg;
 	}
 
 
@@ -59,6 +61,7 @@ public class PBSJobStatusFat extends PBSJobStatusNodes {
 			taskContainerIds[i] = Utils.readStringOrNull(in);
 		trackingURL = Utils.readStringOrNull(in);
 		yarnAppId = Utils.readStringOrNull(in);
+		diagnosticMsg = Utils.readStringOrNull(in);
 	}
 	
 	
@@ -78,6 +81,7 @@ public class PBSJobStatusFat extends PBSJobStatusNodes {
 			Utils.writeStringOrNull(out, id);
 		Utils.writeStringOrNull(out, trackingURL);
 		Utils.writeStringOrNull(out, yarnAppId);
+		Utils.writeStringOrNull(out, diagnosticMsg);
 	}
 	
 	public String getMasterContainerId() {
@@ -100,6 +104,11 @@ public class PBSJobStatusFat extends PBSJobStatusNodes {
 	public String getApplicationId()
 	{
 		return this.yarnAppId;
+	}
+	
+	public String getDiagnosticMessage()
+	{
+		return this.diagnosticMsg;
 	}
 	
 }

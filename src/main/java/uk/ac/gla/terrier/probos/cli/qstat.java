@@ -156,7 +156,7 @@ public class qstat extends Configured implements Tool {
 				out.println();
 				if (nodes)
 				{
-					String nodeList = ((PBSJobStatusNodes)jStatus).getNodes();
+					String nodeList = ((PBSJobStatusNodes)jStatus).getExecutionNodes();
 					if (nodeList != null && nodeList.length() > 0)
 						out.println(nodeList);
 				} else if (arrays && jStatus.hasArray()) {
@@ -195,11 +195,11 @@ public class qstat extends Configured implements Tool {
 		s.append("\n\tJob_Name = " + job.getJob_Name());
 		s.append("\n\tJob_Owner = " + job.getJob_Owner());
 		s.append("\n\tjob_state = " + status.getState());
-		s.append("\n\texec_host = " + status.getNodes());
+		s.append("\n\texec_host = " + status.getExecutionNodes());
+		s.append("\n\tmaster_host = " + status.getMasterNode());
 		s.append("\n\tError_Path = " + job.getError_Path());
 		s.append("\n\tOutput_Path = " + job.getOutput_Path());
 		s.append("\n\tresources_used.cput = " + status.getTimeUse());
-		s.append("\n\texec_host = " + status.getNodes());
 		s.append("\n\tMail_Points = " + job.getMailEvent());
 		s.append("\n\tJoin_Path = " + job.getJoin());
 		s.append("\n\tsubmit_args = " + StringUtils.join(" ", job.getSubmit_args()));
@@ -208,6 +208,7 @@ public class qstat extends Configured implements Tool {
 		s.append("\n\tMaster_Container = " + stringOrEmpty(status.getMasterContainerId()));
 		s.append("\n\tTask_Containers = " + (status.getTaskContainerIds() != null 
 				? StringUtils.join(StringUtils.COMMA_STR, status.getTaskContainerIds()) : ""));
+		s.append("\n\tDiagnostic_Message = " + stringOrEmpty(status.getDiagnosticMessage()));
 		s.append("\n\tTracking_URL = " + stringOrEmpty(status.getTrackingURL()));
 		
 		return s.toString();
