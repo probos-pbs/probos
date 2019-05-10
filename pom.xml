@@ -4,11 +4,12 @@
 	<groupId>uk.ac.gla.terrier</groupId>
 	<artifactId>probos</artifactId>
 	<packaging>jar</packaging>
-	<version>0.3.0-SNAPSHOT</version>
+	<version>0.3.1-SNAPSHOT</version>
 	<!-- when you bump the version number, remember to delete the old jar file 
 		from target/ -->
 	<name>probos</name>
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 		<slf4j.version>1.7.14</slf4j.version>
@@ -20,18 +21,9 @@
 
 	<repositories>
 
-<!--
-		<repository>
-			<id>maven-hadoop</id>
-			<name>Hadoop Releases</name>
-			<url>https://repository.cloudera.com/content/repositories/releases/</url>
-		</repository>
-		<repository>
-			<id>cloudera-repos</id>
-			<name>Cloudera Repos</name>
-			<url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
-		</repository>
--->
+		<!-- <repository> <id>maven-hadoop</id> <name>Hadoop Releases</name> <url>https://repository.cloudera.com/content/repositories/releases/</url> 
+			</repository> <repository> <id>cloudera-repos</id> <name>Cloudera Repos</name> 
+			<url>https://repository.cloudera.com/artifactory/cloudera-repos/</url> </repository> -->
 	</repositories>
 
 	<dependencies>
@@ -63,9 +55,9 @@
 				</exclusion>
 
 				<exclusion>
-                                        <groupId>asm</groupId>
-                                        <artifactId>asm</artifactId>
-                                </exclusion>
+					<groupId>asm</groupId>
+					<artifactId>asm</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -151,18 +143,23 @@
 			<groupId>com.cloudera.kitten</groupId>
 			<artifactId>kitten-client</artifactId>
 			<version>0.4.0</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.cloudera.kitten</groupId>
 			<artifactId>kitten-master</artifactId>
 			<version>0.4.0</version>
+			<scope>provided</scope>
+
 		</dependency>
 
 		<dependency>
 			<groupId>com.cloudera.kitten</groupId>
 			<artifactId>kitten-common</artifactId>
 			<version>0.4.0</version>
+			<scope>provided</scope>
+
 		</dependency>
 
 		<dependency>
