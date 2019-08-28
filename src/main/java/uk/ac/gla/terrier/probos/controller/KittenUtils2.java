@@ -132,8 +132,30 @@ public class KittenUtils2 {
 		w.println(" timeout = -1,");
 		if (job.getQueue() != null && job.getQueue().length() > 0 && ! job.getQueue().equals("default") && ! job.getQueue().equals("null"))
 			w.println(" queue = \""+job.getQueue()+"\",");
-		w.println(" memory = 512,");
-		renderMaster(controllerMasterAddress, w, new HashMap<String,String>());
+		
+
+		//figure out what node has been requested for the master
+		List<NodeRequest> masterRequestNodes = Lists.newArrayList();
+		int masterNodeCount = parseNodeResourceList(job, masterRequestNodes, "master");
+		NodeRequest masterNode = null;
+		if (masterNodeCount > 1)
+		{
+			throw new IllegalArgumentException("Cannot have more than one node count for a master");
+		}
+		else if (masterNodeCount == 1)
+		{
+			masterNode = masterRequestNodes.get(0);
+		}
+		else if (masterNodeCount < 1)
+		{
+			int mem = pConf.getInt(PConfiguration.KEY_JOB_MASTER_DEFAULT_MEM, 512);
+			String[] labels = pConf.getStrings(PConfiguration.KEY_JOB_MASTER_DEFAULT_LABEL);
+			masterNode = new SingleNodeRequest(
+					getNumberOfTasks() > TASK_COUNT_NEEDS_CORE_FOR_APP_MASTER ? 1 : 0, 
+					mem, 0, labels, null);
+		}
+		
+		renderMaster(controllerMasterAddress, w, masterNode, new HashMap<String,String>());
 
 		//TODO: check the job's rerunnable flag
 		
@@ -150,7 +172,7 @@ public class KittenUtils2 {
 		w.println(" }");
 	}
 
-	protected void renderMaster(String controllerMasterAddress, PrintWriter w, Map<String,String> extraEnv) {
+	protected void renderMaster(String controllerMasterAddress, PrintWriter w, NodeRequest node, Map<String,String> extraEnv) {
 		w.println(" master = {");
 		w.println("  env = base_env {");
 		w.println("    PBS_CONTROLLER = \""+ controllerMasterAddress +"\",");
@@ -169,12 +191,10 @@ public class KittenUtils2 {
 		
 		w.println("  resources = base_resources,");
 		
-		//we only allocate a core for the master when we get to really 
-		// big jobs (# of array tasks, or # of parallel tasks)
-		if (getNumberOfTasks() > TASK_COUNT_NEEDS_CORE_FOR_APP_MASTER)
-			w.println("  cores = 1,");
-		else
-			w.println("  cores = 0,");
+		
+		renderNode(w, "  ", node);
+		
+
 		w.println("  command = {");
 		
 		//String javaOpts = "";
@@ -226,18 +246,7 @@ public class KittenUtils2 {
 		//kitten expects a timeout in ms
 		w.println(prefix + "timeout = " + String.valueOf(jobDuration*1000l) + ",");
 		
-		//Resource capability = JobUtils.getResources(job, pConf);
-		w.println(prefix + "cores = " + String.valueOf(thisNode.corePerNode) + ",");
-		w.println(prefix + "memory = " + String.valueOf(thisNode.memory) + ",");
-		w.println(prefix + "gpus = " + String.valueOf(thisNode.gpus) + ",");
-		
-		//node_label
-		printNodeLabels(prefix, w, thisNode.labels);
-		//node hostname
-		if (thisNode instanceof SingleNodeRequest)
-		{
-			w.println(prefix + "node = \""+((SingleNodeRequest)thisNode).hostname+"\",");
-		}
+		renderNode(w, prefix, thisNode);
 			
 		//next, create the container's environment
 		w.print(prefix + "env = job_env");
@@ -255,6 +264,20 @@ public class KittenUtils2 {
 		w.println(",");
 
 		w.println(prefix + "command = \"" + command + "\"" );
+	}
+
+	public void renderNode(PrintWriter w, String prefix, NodeRequest thisNode) {
+		w.println(prefix + "cores = " + String.valueOf(thisNode.corePerNode) + ",");
+		w.println(prefix + "memory = " + String.valueOf(thisNode.memory) + ",");
+		w.println(prefix + "gpus = " + String.valueOf(thisNode.gpus) + ",");
+		
+		//node_label
+		printNodeLabels(prefix, w, thisNode.labels);
+		//node hostname
+		if (thisNode instanceof SingleNodeRequest)
+		{
+			w.println(prefix + "node = \""+((SingleNodeRequest)thisNode).hostname+"\",");
+		}
 	}
 
 	protected void printTaskContainer(String logSuffix, Path targetScript, PrintWriter w, String prefix, Map<String,String> extraEnv, NodeRequest nr)
@@ -337,7 +360,7 @@ public class KittenUtils2 {
 	public static KittenUtils2 createKittenUtil(Configuration pConf, PBSJob job, int jobid)
 	{
 		List<NodeRequest> requestList = Lists.newArrayList();
-		int totalNodes = parseNodeResourceList(job, requestList);
+		int totalNodes = parseNodeResourceList(job, requestList, "nodes");
 		if (job.getInteractive())
 		{
 			if (totalNodes > 1)
@@ -423,11 +446,11 @@ public class KittenUtils2 {
 	}
 	
 	protected static int parseNodeResourceList(PBSJob job,
-			List<NodeRequest> requestList) {
+			List<NodeRequest> requestList, String requestType) {
 		int DEFAULT_MEM = 512;
 		int DEFAULT_GPUS = 0;
 		int totalNodeCount = 0;
-		String nodesExpression =  job.getResource_List().get("nodes");
+		String nodesExpression =  job.getResource_List().get(requestType);
 		//no nodes statement, return default
 		if (nodesExpression == null)
 		{
@@ -482,7 +505,7 @@ public class KittenUtils2 {
 			
 			if (nodeName != null && nodeCount > 1)
 			{
-				throw new IllegalArgumentException("Cannot have a node cout for a hostname");
+				throw new IllegalArgumentException("Cannot have a node count for a hostname");
 			}
 			NodeRequest spec;
 			if (nodeCount > 1)

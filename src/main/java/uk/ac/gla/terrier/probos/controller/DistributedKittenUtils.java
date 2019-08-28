@@ -104,10 +104,10 @@ public class DistributedKittenUtils extends KittenUtils2 {
 	}
 	
 	@Override
-	protected void renderMaster(String controllerMasterAddress, PrintWriter w,
-			Map<String, String> extraEnv) {
+	protected void renderMaster(String controllerMasterAddress, PrintWriter w, 
+			NodeRequest nodeSpec, Map<String, String> extraEnv) {
 		extraEnv.put("PBS_SISTER_COUNT", String.valueOf(totalNodeCount-1));
-		super.renderMaster(controllerMasterAddress, w, extraEnv);
+		super.renderMaster(controllerMasterAddress, w, nodeSpec, extraEnv);
 	}
 
 	protected void renderSisterSuperiorContainer(PrintWriter w, Path targetScript, NodeRequest nr) throws IOException
