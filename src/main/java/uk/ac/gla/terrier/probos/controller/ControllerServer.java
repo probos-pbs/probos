@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
@@ -118,6 +119,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.AbstractService;
+import com.google.common.util.concurrent.ListenableFuture;
 /** This ProBoS controller class implements the equivalent functionality of PBS Server. 
  * PBS jobs are received, and then passed onto YARN for processing.
  * We use Kitten to control the status of a job. The ApplicationMaster
@@ -701,9 +703,10 @@ public class ControllerServer extends AbstractService implements PBSClient {
 						 super.submitApplication(appContext);
 					}					
 				};
-				service.startAndWait();
-				if (!service.isRunning()) {
-				     LOG.error("YarnClientService failed to startup, exiting...");
+				ListenableFuture<State> fstate = service.start();
+				State state = fstate.get(60, TimeUnit.SECONDS);
+				if (state != State.RUNNING || !service.isRunning()) {
+				     LOG.error("YarnClientService failed to startup after 60 seconds, exiting...");
 				     jobArray.remove(ji.jobId);
 				     return ji.jobId;
 				}
