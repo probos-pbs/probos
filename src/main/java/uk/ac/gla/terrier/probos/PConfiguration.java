@@ -39,6 +39,10 @@ public class PConfiguration extends Configuration {
 	public static final String KEY_JOB_DEFAULT_MEM = Constants.PRODUCT_NAME + ".job.default.mem";
 	public static final String KEY_JOB_DEFAULT_DURATION = Constants.PRODUCT_NAME + ".job.default.duration";
 	
+	//public static final String KEY_JOB_DEFAULT_CORES = Constants.PRODUCT_NAME + ".job.master.default.cores";
+	public static final String KEY_JOB_MASTER_DEFAULT_MEM = Constants.PRODUCT_NAME + ".job.master.default.mem";
+	public static final String KEY_JOB_MASTER_DEFAULT_LABEL = Constants.PRODUCT_NAME + ".job.master.default.label";
+	
 	//queue constraints
 	public static final String KEY_JOB_MAX_QUEUE = Constants.PRODUCT_NAME + ".job.max.queueable";
 	public static final String KEY_JOB_MAX_USER_QUEUE = Constants.PRODUCT_NAME + ".job.max.user.queueable";
