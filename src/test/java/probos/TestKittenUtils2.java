@@ -197,6 +197,51 @@ public class TestKittenUtils2 {
 	}
 	
 	@Test
+	public void testLuaMasterDefaults() throws Exception {
+		PBSJob job;
+		job = UtilsForTest.getSimpleJob("testLuaMaster", "export", new String[]{});
+		
+		Resource MAX = Records.newRecord(Resource.class);
+		MAX.setMemorySize(Integer.MAX_VALUE);
+		MAX.setVirtualCores(100);
+		
+		LuaYarnClientParameters lamp = testJobCompilesClient(job);
+		assertEquals(512, lamp.getApplicationMasterParameters(null).getContainerResource(MAX).getMemorySize());
+		assertEquals(1, lamp.getApplicationMasterParameters(null).getContainerResource(MAX).getVirtualCores());
+	}
+	
+	@Test
+	public void testLuaMasterMemoryCmdline() throws Exception {
+		PBSJob job;
+		int mem = 32000;
+		job = UtilsForTest.getSimpleJob("testLuaMasterMemory", "export", new String[]{"-l", "master=1:mem=" + mem});
+		
+		Resource MAX = Records.newRecord(Resource.class);
+		MAX.setMemorySize(Integer.MAX_VALUE);
+		MAX.setVirtualCores(100);
+		
+		LuaYarnClientParameters lamp = testJobCompilesClient(job);
+		assertEquals(mem, lamp.getApplicationMasterParameters(null).getContainerResource(MAX).getMemorySize());
+		//default is 1 core when master is specified
+		assertEquals(1, lamp.getApplicationMasterParameters(null).getContainerResource(MAX).getVirtualCores());
+	}
+	
+	@Test
+	public void testLuaMasterMemoryCores() throws Exception {
+		PBSJob job;
+		int cores = 3;
+		job = UtilsForTest.getSimpleJob("testLuaMasterMemory", "export", new String[]{"-l", "master=1:ppn=" + 3});
+		
+		Resource MAX = Records.newRecord(Resource.class);
+		MAX.setMemorySize(Integer.MAX_VALUE);
+		MAX.setVirtualCores(100);
+		
+		LuaYarnClientParameters lamp = testJobCompilesClient(job);
+		assertEquals(512, lamp.getApplicationMasterParameters(null).getContainerResource(MAX).getMemorySize());
+		assertEquals(cores, lamp.getApplicationMasterParameters(null).getContainerResource(MAX).getVirtualCores());
+	}
+	
+	@Test
 	public void testLuaMemoryCmdline() throws Exception {
 		PBSJob job;
 		int mem = 32000;
